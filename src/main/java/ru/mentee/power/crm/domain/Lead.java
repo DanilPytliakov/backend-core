@@ -7,7 +7,7 @@ public class Lead {
     final String company;
     final String status;
 
-    Lead (String id, String email, String phone, String company, String status) {
+    public Lead(String id, String email, String phone, String company, String status) {
         this.id = id;
         this.email = email;
         this.phone = phone;
