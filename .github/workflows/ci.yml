@@ -1,0 +1,43 @@
+name: Java CI with Checkstyle and JaCoCo
+
+on:
+  push:
+    branches:
+      - master
+      - 'feature/**'
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Сканирование кода
+        uses: actions/checkout@v4
+
+      - name: Устанавливает права на выполнение для Gradle Wrapper в Linux-окружении GitHub Actions.
+        run: chmod +x gradlew
+
+      - name: задаём требуемную версию JDK 25 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+          cache: 'gradle'
+
+      - name: Проверка на соблюдение стиля кода
+        run: ./gradlew --no-daemon checkstyleMain checkstyleTest
+
+      - name: Запуск тестов
+        run: ./gradlew --no-daemon test
+
+      - name: Генерация отчёта покрытия тестами 
+        run: ./gradlew --no-daemon jacocoTestReport
+
+      - name:  Проверка порога покрытия (80%).
+        run: ./gradlew --no-daemon jacocoTestCoverageVerification
+
+      - name: Cборка проекта
+        run: ./gradlew --no-daemon build
