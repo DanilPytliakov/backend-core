@@ -72,7 +72,7 @@ public class LeadStorage {
     static void main() {
         LeadStorage l1 = new LeadStorage();
         String s1 = null;
-        System.out.println(l1.add(new Lead("1",null, "+7123", "TechCorp", "NEW")));
+        System.out.println(l1.add(new Lead("1", null, "+7123", "TechCorp", "NEW")));
         System.out.println(l1.size());
         System.out.println(l1.add(new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW")));
         System.out.println(l1.size());
