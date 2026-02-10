@@ -1,7 +1,10 @@
 package ru.mentee.power.crm.storage;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+
 
 import org.junit.jupiter.api.Test;
 import ru.mentee.power.crm.domain.Lead;
@@ -71,5 +74,17 @@ class LeadStorageTest {
         // Then
         assertThat(result).hasSize(2);
         assertThat(result).containsExactly(firstLead, secondLead);
+    }
+    @Test
+    void shouldReturnNullPointerExceptionWhenLeadWithWithoutEmailAdded() {
+        // Given
+        LeadStorage storage = new LeadStorage();
+        Lead correcctLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+        storage.add(correcctLead);
+        Lead leadWithoutEmail = new Lead("2", null, "+7456", "StartupLab", "NEW");
+
+        assertThrows(NullPointerException.class, () -> {
+            storage.add(leadWithoutEmail);
+        });
     }
 }
