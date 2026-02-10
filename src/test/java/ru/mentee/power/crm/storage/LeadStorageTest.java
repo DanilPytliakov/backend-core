@@ -1,7 +1,6 @@
 package ru.mentee.power.crm.storage;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
@@ -73,6 +72,7 @@ class LeadStorageTest {
         assertThat(result).hasSize(2);
         assertThat(result).containsExactly(firstLead, secondLead);
     }
+
     @Test
     void shouldReturnAddedLeadsEvenWithoutEmail() {
         // Given
