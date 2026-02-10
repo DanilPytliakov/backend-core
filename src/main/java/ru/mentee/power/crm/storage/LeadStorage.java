@@ -9,7 +9,7 @@ public class LeadStorage {
         //Проверка на дубликаты
         for (int i = 0; i < leads.length; i++) {
             if (leads[i] != null
-                && lead.getEmail().equals(leads[i].getEmail())) {
+                && leads[i].getEmail().equals(lead.getEmail())) {
                 return false; //Такой лид уже есть
             }
         }
