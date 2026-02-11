@@ -1,10 +1,7 @@
 package ru.mentee.power.crm.storage;
 
-import ru.mentee.power.crm.domain.Lead;
-
-import java.util.Objects;
-
 public class LeadStorage {
+    /*
     private Lead[] leads = new Lead[100];
 
     public boolean add(Lead lead) {
@@ -12,7 +9,7 @@ public class LeadStorage {
         for (int i = 0; i < leads.length; i++) {
             if (leads[i] != null
                 // Вместо && lead.getEmail().equals(leads[i].getEmail())) {
-                && Objects.equals(lead.email(), leads[i].email())) {
+                && Objects.equals(lead.contact().email(), leads[i].contact().email())) {
                 return false; //Такой лид уже есть
             }
         }
@@ -71,4 +68,6 @@ public class LeadStorage {
         //Возвращаем количество заполненных элементов
         return count;
     }
+
+     */
 }
