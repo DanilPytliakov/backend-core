@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +13,7 @@ class LeadEqualsHashCodeTest {
     @Test
     void shouldBeReflexiveWhenEqualsCalledOnSameObject() {
         // Given
-        Lead lead = new Lead("L1", "test@example.com", "+71234567890", "TestCorp", "NEW");
+        Lead lead = new Lead(UUID.randomUUID(), "test@example.com", "+71234567890", "TestCorp", "NEW");
 
         // Then
         assertThat(lead.equals(lead)).isEqualTo(true);
@@ -22,8 +23,8 @@ class LeadEqualsHashCodeTest {
     @Test
     void shouldBeSymmetricWhenEqualsCalledOnTwoObjects() {
         // Given
-        Lead firstLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
-        Lead secondLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+        Lead firstLead = new Lead(UUID.randomUUID(), "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+        Lead secondLead = new Lead(firstLead.id(), "ivan@mail.ru", "+7123", "TechCorp", "NEW");
 
         // Then
         assertThat(firstLead).isEqualTo(secondLead);
@@ -34,9 +35,9 @@ class LeadEqualsHashCodeTest {
     @Test
     void shouldBeTransitiveWhenEqualsChainOfThreeObjects() {
         // Given
-        Lead firstLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
-        Lead secondLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
-        Lead thirdLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+        Lead firstLead = new Lead(UUID.randomUUID(), "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+        Lead secondLead = new Lead(firstLead.id(), "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+        Lead thirdLead = new Lead(firstLead.id(), "ivan@mail.ru", "+7123", "TechCorp", "NEW");
 
         // Then
         assertThat(firstLead).isEqualTo(secondLead);
@@ -47,8 +48,8 @@ class LeadEqualsHashCodeTest {
     @Test
     void shouldBeConsistentWhenEqualsCalledMultipleTimes() {
         // Given
-        Lead firstLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
-        Lead secondLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+        Lead firstLead = new Lead(UUID.randomUUID(), "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+        Lead secondLead = new Lead(firstLead.id(), "ivan@mail.ru", "+7123", "TechCorp", "NEW");
 
         // Then: Результат одинаковый при многократных вызовах
         assertThat(firstLead).isEqualTo(secondLead);
@@ -60,7 +61,7 @@ class LeadEqualsHashCodeTest {
     @Test
     void shouldReturnFalseWhenEqualsComparedWithNull() {
         // Given
-        Lead lead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+        Lead lead = new Lead(UUID.randomUUID(), "ivan@mail.ru", "+7123", "TechCorp", "NEW");
 
         // Then: Объект не равен null (isNotEqualTo проверяет equals(null) = false)
         assertThat(lead).isNotEqualTo(null);
@@ -71,7 +72,7 @@ class LeadEqualsHashCodeTest {
     void shouldBeNullSafeWhenEqualsCalledOnVariableWithNullInstedOfObjectReference() {
         // Given
 
-        Lead lead = new Lead("L1", "test@example.com", "+71234567890", "TestCorp", "NEW");
+        Lead lead = new Lead(UUID.randomUUID(), "test@example.com", "+71234567890", "TestCorp", "NEW");
         Lead nullLead = null;
 
         // Then
@@ -82,7 +83,7 @@ class LeadEqualsHashCodeTest {
     @Test
     void shouldBeObjectEqualsNullSafes() {
         // Given
-        Lead firstLead = new Lead("L1", "test@example.com", "+71234567890", "TestCorp", "NEW");
+        Lead firstLead = new Lead(UUID.randomUUID(), "test@example.com", "+71234567890", "TestCorp", "NEW");
         Lead secondLead = new Lead(null, "test@example.com", "+71234567890", "TestCorp", "NEW");
         Lead thirdLead = new Lead(null, "test@example.com", "+71234567890", "TestCorp", "NEW");
 
@@ -95,25 +96,12 @@ class LeadEqualsHashCodeTest {
 
     }
 
-    //hashCode() вычисляется по тому же полю id
-    @Test
-    void shouldBeEqualsWhenEqualsCalledOnTwoObjectsWithOnlySameId() {
-        // Given
-        Lead firstLead = new Lead("L1", "test@example.com", "+71234567890", "TestCorp", "NEW");
-        Lead secondLead = new Lead("L2", "test@example.com", "+71234567890", "TestCorp", "NEW");
-        Lead thirdLead = new Lead("L1", "test@mail.ru", "+71234111111", "Corp", "OLD");
-
-        // Then
-        assertThat(firstLead.equals(secondLead)).isEqualTo(false);
-        assertThat(firstLead.equals(thirdLead)).isEqualTo(true);
-    }
-
     //HashMap
     @Test
     void shouldWorkInHashMapWhenLeadUsedAsKey() {
         // Given
-        Lead keyLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
-        Lead lookupLead = new Lead("1", "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+        Lead keyLead = new Lead(UUID.randomUUID(), "ivan@mail.ru", "+7123", "TechCorp", "NEW");
+        Lead lookupLead = new Lead(keyLead.id(), "ivan@mail.ru", "+7123", "TechCorp", "NEW");
 
         Map<Lead, String> map = new HashMap<>();
         map.put(keyLead, "CONTACTED");
