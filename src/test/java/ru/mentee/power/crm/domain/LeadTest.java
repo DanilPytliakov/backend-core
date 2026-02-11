@@ -1,85 +1,75 @@
 package ru.mentee.power.crm.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Objects;
-import java.util.UUID;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 
 class LeadTest {
-    @Test
-    void shouldReturnEmailWhenGetEmailCalled() {
-        // Given
-        Lead lead = new Lead(UUID.randomUUID(), "test@example.com", "+71234567890", "TestCorp", "NEW");
 
+    @Test
+    void shouldCreateLeadWhenValidData() {
         // When
-        String email = lead.email();
+        Address address = new Address("San Francisco", "123 Main St", "94105");
+        Contact contact = new Contact("test@example.com", "+71234567890", address);
+        Lead lead = new Lead(contact, "TechCorp", "NEW");
 
         // Then
-        assertThat(email).isEqualTo("test@example.com");
+        assertThat(lead.contact()).isEqualTo(contact);
     }
 
     @Test
-    void shouldReturnCompanyWhenGetCompanyCalled() {
-        // Given
-        Lead lead = new Lead(UUID.randomUUID(), "test@example.com", "+71234567890", "TestCorp", "NEW");
-
+    void shouldAccessEmailThroughDelegationWhenLeadCreated() {
         // When
-        String company = lead.company();
+        Address address = new Address("San Francisco", "123 Main St", "94105");
+        Contact contact = new Contact("test@example.com", "+71234567890", address);
+        Lead lead = new Lead(contact, "TechCorp", "NEW");
 
         // Then
-        assertThat(company).isEqualTo("TestCorp");
+        assertThat(lead.contact().email()).isEqualTo("test@example.com");
+        assertThat(lead.contact().address().city()).isEqualTo("San Francisco");
     }
 
     @Test
-    void shouldReturnStatusWhenGetStatusCalled() {
-        // Given
-        Lead lead = new Lead(UUID.randomUUID(), "test@example.com", "+71234567890", "TestCorp", "NEW");
-
+    void shouldBeEqualWhenSameIdButDifferentContact() {
         // When
-        String status = lead.status();
+        Address address = new Address("San Francisco", "123 Main St", "94105");
+        Contact firstLeadContact = new Contact("test@example.com", "+71234567890", address);
+        Contact secondLeadContact = new Contact("test@mail.ru", "+71298765432", address);
+        Lead firstLead = new Lead(firstLeadContact, "TechCorp", "NEW");
+        Lead secondLead = new Lead(firstLead.id(), secondLeadContact, "TechCorp", "NEW");
+
+        //Then
+        assertThat(firstLead.equals(secondLead)).isTrue();
+    }
+
+    @Test
+    void shouldThrowExceptionWhenContactIsNull() {
+        // Аналогично с класcом Contact
+        assertThatThrownBy(() -> new Lead(null, "TechCorp", "NEW"))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("Поле с ссылкой на объект класса Contact электронной почты не должно быть null");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenInvalidStatus() {
+        // When
+        Address address = new Address("San Francisco", "123 Main St", "94105");
+        Contact contact = new Contact("test@example.com", "+71234567890", address);
+        assertThatThrownBy(() -> new Lead(contact, "TechCorp", "OLD"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Поле статуса не соттветствует приведенным стандартам"
+                        + "\\nВозможные варианты: \"NEW\", \"QUALIFIED\", \"CONVERTED\"");
+    }
+
+    @Test
+    void shouldDemonstrateThreeLevelCompositionWhenAccessingCity() {
+        // When
+        Address address = new Address("San Francisco", "123 Main St", "94105");
+        Contact contact = new Contact("test@example.com", "+71234567890", address);
+        Lead lead = new Lead(contact, "TechCorp", "NEW");
 
         // Then
-        assertThat(status).isEqualTo("NEW");
-    }
-
-    @Test
-    void shouldReturnPhoneWhenGetPhoneCalled() {
-        // Given
-        Lead lead = new Lead(UUID.randomUUID(), "test@example.com", "+71234567890", "TestCorp", "NEW");
-
-        // When
-        String phone = lead.phone();
-
-        // Then
-        assertThat(phone).isEqualTo("+71234567890");
-    }
-
-    @Test
-    void shouldReturnFormattedStringWhenToStringCalled() {
-        Lead lead = new Lead(UUID.randomUUID(), "test@example.com", "+71234567890", "TestCorp", "NEW");
-        String testLead =
-                "Lead[id=" + lead.id() + ", email=test@example.com, phone=+71234567890, company=TestCorp, status=NEW]";
-        assertThat(testLead).isEqualTo(lead.toString());
-    }
-
-    //Метод для теста
-    boolean findById(Lead leadForCompare, UUID id) {
-        if (Objects.equals(leadForCompare.id(), id)) {
-            return true;
-        }
-        return false;
-    }
-
-    @Test
-    void shouldPreventStringConfusionWhenUsingUUID() {
-        // Given
-        Lead leadForCompare = new Lead(UUID.randomUUID(), "test@example.com", "+71234567890", "TestCorp", "NEW");
-
-        // When
-        assertThat(findById(leadForCompare, leadForCompare.id())).isTrue();
-
-        // assertThat(findById(leadForCompare, "SomeString").isTrue(); не запускается
+        assertThat(lead.contact().address().city()).isEqualTo("San Francisco");
     }
 }

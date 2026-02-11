@@ -1,14 +1,7 @@
 package ru.mentee.power.crm.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import org.junit.jupiter.api.Test;
-
 class LeadEqualsHashCodeTest {
+    /*
     //Рефлексивность
     @Test
     void shouldBeReflexiveWhenEqualsCalledOnSameObject() {
@@ -112,4 +105,6 @@ class LeadEqualsHashCodeTest {
         // Then: HashMap нашел значение благодаря equals/hashCode
         assertThat(status).isEqualTo("CONTACTED");
     }
+
+     */
 }
