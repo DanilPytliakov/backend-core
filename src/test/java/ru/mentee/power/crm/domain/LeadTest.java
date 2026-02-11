@@ -2,10 +2,10 @@ package ru.mentee.power.crm.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.Test;
-
 import java.util.Objects;
 import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
 
 class LeadTest {
     @Test
@@ -59,20 +59,21 @@ class LeadTest {
     @Test
     void shouldReturnFormattedStringWhenToStringCalled() {
         Lead lead = new Lead(UUID.randomUUID(), "test@example.com", "+71234567890", "TestCorp", "NEW");
-        String testLead = "Lead[id=" + lead.id() + ", email=test@example.com, phone=+71234567890, company=TestCorp, status=NEW]";
+        String testLead =
+                "Lead[id=" + lead.id() + ", email=test@example.com, phone=+71234567890, company=TestCorp, status=NEW]";
         assertThat(testLead).isEqualTo(lead.toString());
     }
 
     //Метод для теста
-    boolean findById(Lead leadForCompare, UUID id){
-        if(Objects.equals(leadForCompare.id(), id)){
+    boolean findById(Lead leadForCompare, UUID id) {
+        if (Objects.equals(leadForCompare.id(), id)) {
             return true;
         }
         return false;
     }
 
     @Test
-    void shouldPreventStringConfusion_whenUsingUUID() {
+    void shouldPreventStringConfusionWhenUsingUUID() {
         // Given
         Lead leadForCompare = new Lead(UUID.randomUUID(), "test@example.com", "+71234567890", "TestCorp", "NEW");
 
