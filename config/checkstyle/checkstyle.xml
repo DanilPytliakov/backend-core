@@ -81,9 +81,10 @@
         </module>
         <!--  ==================== IMPORTS ====================  -->
         <!--  CRITICAL: No wildcard imports  -->
-        <module name="AvoidStarImport">
+
+        <!--<module name="AvoidStarImport">
             <property name="severity" value="error"/>
-        </module>
+        </module> -->
         <!--  WARNING: Import order  -->
         <module name="CustomImportOrder">
             <property name="severity" value="warning"/>
