@@ -2,8 +2,8 @@ package ru.mentee.power.crm.storage;
 
 import java.util.*;
 
-import ru.mentee.power.crm.domain.Repository;
 import ru.mentee.power.crm.domain.Lead;
+import ru.mentee.power.crm.domain.Repository;
 
 public class InMemoryLeadRepository implements Repository<Lead> {
     private final ArrayList<Lead> storage = new ArrayList<Lead>();
@@ -15,15 +15,15 @@ public class InMemoryLeadRepository implements Repository<Lead> {
 
     @Override
     public void add(Lead entity) {
-        if(!storage.contains(entity)){
+        if (!storage.contains(entity)) {
             storage.add(entity);
         }
     }
 
     @Override
     public void remove(UUID targetId) {
-        for (int i = 0; i < storage.size(); i++){
-            if(Objects.equals(storage.get(i).id(),targetId)){
+        for (int i = 0; i < storage.size(); i++) {
+            if (Objects.equals(storage.get(i).id(), targetId)) {
                 storage.remove(i);
                 break;
             }
@@ -33,7 +33,7 @@ public class InMemoryLeadRepository implements Repository<Lead> {
     @Override
     public Optional<Lead> findById(UUID targetId) {
         return storage.stream()
-                .filter(lead -> Objects.equals(lead.id(),targetId)).
+                .filter(lead -> Objects.equals(lead.id(), targetId)).
                 findFirst();
     }
 
