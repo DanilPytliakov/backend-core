@@ -2,6 +2,8 @@ package ru.mentee.power.crm.storage;
 
 import ru.mentee.power.crm.domain.Lead;
 
+import java.util.Objects;
+
 public class LeadStorage {
     private Lead[] leads = new Lead[100];
 
@@ -9,7 +11,7 @@ public class LeadStorage {
         //Проверка на дубликаты
         for (int i = 0; i < leads.length; i++) {
             if (leads[i] != null
-                && leads[i].getEmail().equals(lead.getEmail())) {
+                && Objects.equals(leads[i].getEmail(),lead.getEmail())) {
                 return false; //Такой лид уже есть
             }
         }
