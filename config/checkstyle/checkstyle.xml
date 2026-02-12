@@ -39,7 +39,7 @@
     <module name="LineLength">
         <property name="severity" value="warning"/>
         <property name="max" value="120"/>
-        <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
+        <property name="ignorePattern" value="^package.*|a href|href|http://|https://|ftp://"/>
     </module>
     <!--  ========== TREE WALKER ==========  -->
     <module name="TreeWalker">
