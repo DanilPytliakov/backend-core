@@ -43,4 +43,3 @@ public record Lead (
         return Objects.hashCode(id);
     }
 };
-
