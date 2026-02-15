@@ -24,7 +24,6 @@ public record Lead (
         }
     }
 
-    //Перегруженный конструктор для случаев, где мы не указываем idl, а он генерируется автоматически
     public Lead(Contact contact, String company, String status) {
         this(UUID.randomUUID(), contact, company, status);
     }
