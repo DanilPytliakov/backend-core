@@ -16,14 +16,11 @@ public class LeadRepository {
     }
 
     public List<Lead> findAll() {
-        // TODO: Вернуть все значения из storage через values()
-        // Преобразовать Collection в List
         return new ArrayList<>(storage.values());
     }
 
     public void delete(String id) {
         storage.remove(id);
-        // TODO: Удалить лид через storage.remove(id)
     }
 
     public int size() {

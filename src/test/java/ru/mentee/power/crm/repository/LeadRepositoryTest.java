@@ -111,9 +111,5 @@ class LeadRepositoryTest {
 
         // Then: Repository сохранил оба (это технически правильно!)
         assertThat(repository.size()).isEqualTo(2);
-
-        // But: Бизнес недоволен — в CRM два контакта на одного человека
-        // Решение: Service Layer в Sprint 5 будет проверять бизнес-правила
-        // перед вызовом repository.save()
     }
 }
