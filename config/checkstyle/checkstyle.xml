@@ -57,7 +57,7 @@
         <!--  Method names: camelCase  -->
         <module name="MethodName">
             <property name="severity" value="error"/>
-            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+            <property name="format" value="^[a-z][a-zA-Z0-9_]*$"/>
         </module>
         <!--  Field names: camelCase  -->
         <module name="MemberName">
