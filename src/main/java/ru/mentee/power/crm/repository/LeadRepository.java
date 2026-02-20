@@ -4,26 +4,15 @@ import java.util.*;
 
 import ru.mentee.power.crm.model.Lead;
 
-public class LeadRepository {
-    private final Map<String, Lead> storage = new HashMap<>();
+public interface LeadRepository {
 
-    public void save(Lead lead) {
-        storage.put(lead.id(), lead);
-    }
+    Lead save(Lead lead);
 
-    public Lead findById(String id) {
-        return storage.get(id);
-    }
+    Optional<Lead> findById(UUID id);
 
-    public List<Lead> findAll() {
-        return new ArrayList<>(storage.values());
-    }
+    Optional<Lead> findByEmail(String email);
 
-    public void delete(String id) {
-        storage.remove(id);
-    }
+    List<Lead> findAll();
 
-    public int size() {
-        return storage.size();
-    }
+    void delete(UUID id);
 }
