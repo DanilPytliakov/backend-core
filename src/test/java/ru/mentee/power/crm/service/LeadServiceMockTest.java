@@ -1,5 +1,12 @@
 package ru.mentee.power.crm.service;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Optional;
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,15 +16,8 @@ import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.model.LeadStatus;
 import ru.mentee.power.crm.repository.LeadRepository;
 
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
-class LeadMockServiceTest {
+class LeadServiceMockTest {
 
     @Mock
     private LeadRepository mockRepository;
@@ -69,7 +69,6 @@ class LeadMockServiceTest {
         // Then: save() НЕ должен быть вызван
         verify(mockRepository, never()).save(any(Lead.class));
     }
-
 
     @Test
     void shouldCallFindByEmail_beforeSave() {
