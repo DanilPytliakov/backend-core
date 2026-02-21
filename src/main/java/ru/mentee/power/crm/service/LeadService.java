@@ -1,4 +1,4 @@
-package ru.mentee.power.crm.repository;
+package ru.mentee.power.crm.service;
 
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.model.LeadStatus;

@@ -11,7 +11,6 @@ public class InMemoryLeadRepository implements LeadRepository {
 
     @Override
     public Lead save(Lead lead) {
-        // Просто сохраняем — никакой бизнес-логики!
         storage.put(lead.id(), lead);
         emailIndex.put(lead.email(), lead.id());
         return lead;
