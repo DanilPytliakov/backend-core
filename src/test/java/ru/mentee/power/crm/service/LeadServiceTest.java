@@ -1,4 +1,4 @@
-package ru.mentee.power.crm.repository;
+package ru.mentee.power.crm.service;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.model.LeadStatus;
+import ru.mentee.power.crm.repository.InMemoryLeadRepository;
+import ru.mentee.power.crm.repository.LeadRepository;
 
 class LeadServiceTest {
 
@@ -99,5 +101,23 @@ class LeadServiceTest {
 
         // Then
         assertThat(result).isEmpty();
+    }
+
+    // Тест на сохранение лида с неверным значение входных данных
+    @Test
+    void shouldThrowException_whenWeTryToSaveLeedWithNullElements() {
+        // When/Then
+        assertThatThrownBy(() ->
+                service.addLead("test@example.com", null, LeadStatus.NEW)
+        )
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("Поле с названием компани не должно быть null");
+
+        // Исключение выкидывается ещё на этапе создания объекта
+        assertThatThrownBy(() ->
+                new Lead("test@example.com", null, LeadStatus.NEW)
+        )
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("Поле с названием компани не должно быть null");
     }
 }

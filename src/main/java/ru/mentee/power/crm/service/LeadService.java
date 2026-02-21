@@ -1,19 +1,18 @@
-package ru.mentee.power.crm.repository;
-
-import ru.mentee.power.crm.model.Lead;
-import ru.mentee.power.crm.model.LeadStatus;
-import ru.mentee.power.crm.repository.LeadRepository;
+package ru.mentee.power.crm.service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import ru.mentee.power.crm.model.Lead;
+import ru.mentee.power.crm.model.LeadStatus;
+import ru.mentee.power.crm.repository.LeadRepository;
+
 public class LeadService {
 
     private final LeadRepository repository;
 
-    // DI через конструктор — не создаём repository внутри!
     public LeadService(LeadRepository repository) {
         this.repository = repository;
     }
