@@ -20,7 +20,7 @@ java {
 }
 
 application {
-    mainClass = 'ru.mentee.power.ProgressDemo'
+    mainClass = 'ru.mentee.power.crm.Main'
 }
 
 repositories {
