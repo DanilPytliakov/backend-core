@@ -44,4 +44,21 @@ class HelloCrmServerTest {
         // Then: ответ 200
         assertThat(response.statusCode()).isEqualTo(200);
     }
+
+    @Test
+    void shouldReturn404ForUnknownPath() throws Exception {
+        // Given
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:" + port + "/unknown"))
+                .GET()
+                .build();
+
+        // When
+        HttpResponse<String> response =
+                client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        // Then
+        assertThat(response.statusCode()).isEqualTo(404);
+    }
 }
