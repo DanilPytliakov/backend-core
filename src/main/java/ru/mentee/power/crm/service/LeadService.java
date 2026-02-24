@@ -7,13 +7,14 @@ import java.util.UUID;
 
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.model.LeadStatus;
+import ru.mentee.power.crm.repository.InMemoryLeadRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
 
 public class LeadService {
 
     private final LeadRepository repository;
 
-    public LeadService(LeadRepository repository) {
+    public LeadService(InMemoryLeadRepository repository) {
         this.repository = repository;
     }
 

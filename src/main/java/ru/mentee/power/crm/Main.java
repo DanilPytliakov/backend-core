@@ -1,20 +1,52 @@
 package ru.mentee.power.crm;
 
-import ru.mentee.power.crm.web.HelloCrmServer;
+import java.io.File;
+
+import org.apache.catalina.Context;
+import org.apache.catalina.startup.Tomcat;
+import ru.mentee.power.crm.model.LeadStatus;
+import ru.mentee.power.crm.repository.InMemoryLeadRepository;
+import ru.mentee.power.crm.service.LeadService;
+import ru.mentee.power.crm.servlet.LeadListServlet;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        int port = 8080;
-        HelloCrmServer server = new HelloCrmServer(port);
+        InMemoryLeadRepository repository = new InMemoryLeadRepository();
+        LeadService leadService = new LeadService(repository);
+        for (int i = 0; i < 5; i++) {
+            leadService.addLead(
+                    "User" + i + "@gmail.com",
+                    "Company" + i,
+                    LeadStatus.NEW);
+        }
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("Stopping server...");
-            server.stop();
-        }));
+        // Создаём экземпляр Tomcat
+        Tomcat tomcat = new Tomcat();
 
-        server.start(port);
+        // Устанавливаем порт
+        tomcat.setPort(8080);
+        tomcat.getConnector();
 
-        Thread.currentThread().join();
+        // Создаём контекст приложения
+        Context context = tomcat.addContext("/leads", new File(".").getAbsolutePath());
+
+        // Сохраняем LeadService в контекст
+        context.getServletContext().setAttribute("leadService", leadService);
+
+        // Регистрируем LeadListServlet
+        tomcat.addServlet(context, "LeadListServlet", new LeadListServlet());
+
+        // Задаём URL маппинг
+        context.addServletMappingDecoded("", "LeadListServlet");
+
+        // Запускаем сервер
+        tomcat.start();
+
+        System.out.println("Tomcat started on port 8080");
+        System.out.println("Open http://localhost:8080/leads in browser");
+
+        // Блокируем main поток через tomcat.getServer().await() (чтобы сервер не завершился)
+        tomcat.getServer().await();
     }
 }
