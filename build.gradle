@@ -4,6 +4,8 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'gg.jte.gradle' version '3.1.15'
+    id 'org.springframework.boot' version '4.0.2'
+    id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'ru.mentee.power'
@@ -15,6 +17,7 @@ ext {
     servletVersion = '6.1.0'
     tomcatVersion = '11.0.1'
     jteVersion = '3.1.15'
+    springBootVersion = '3.2.0'
 }
 
 java {
@@ -42,6 +45,7 @@ dependencies {
     implementation "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
     implementation "gg.jte:jte:${jteVersion}"
     implementation "gg.jte:jte-runtime:${jteVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
 }
 
 checkstyle {
@@ -98,4 +102,19 @@ jte {
     sourceDirectory = layout.projectDirectory.dir("src/main/jte").asFile.toPath()
     contentType = "Html"
     binaryStaticContent = false
+}
+
+task bootRun8081(type: org.springframework.boot.gradle.tasks.run.BootRun) {
+    group = 'application'
+    description = 'Run Spring Boot on port 8081'
+
+    mainClass = 'ru.mentee.power.crm.spring.Application'
+    classpath = sourceSets.main.runtimeClasspath
+
+    jvmArgs = [
+            '--enable-preview',
+            '-Dserver.port=8081'
+    ]
+
+    args = ['--server.port=8081']
 }
