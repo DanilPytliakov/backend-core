@@ -6,6 +6,3 @@ gg:
     template-location: src/main/jte
     development-mode: true
 
-logging:
-  level:
-    org.springframework: DEBUG
