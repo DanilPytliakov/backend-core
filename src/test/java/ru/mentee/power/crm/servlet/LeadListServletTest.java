@@ -113,7 +113,6 @@ class LeadListServletTest {
         );
     }
 
-
     // Тест с реальным TemplateEngine для покрытия JTE
     void shouldRenderRealJteTemplates() throws Exception {
         // Настраиваем реальный TemplateEngine

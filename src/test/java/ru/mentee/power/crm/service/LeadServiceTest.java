@@ -114,8 +114,7 @@ class LeadServiceTest {
 
         // Исключение выкидывается ещё на этапе создания объекта
         assertThatThrownBy(() ->
-                new Lead("test@example.com", null, LeadStatus.NEW)
-        )
+                new Lead("test@example.com", null, LeadStatus.NEW))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("Поле с названием компани не должно быть null");
     }
