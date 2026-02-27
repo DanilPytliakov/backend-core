@@ -4,7 +4,8 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'gg.jte.gradle' version '3.1.15'
-    id 'org.springframework.boot' version '4.0.2'
+    // Ставим реально существующую последнюю версию:
+    id 'org.springframework.boot' version '3.5.0'
     id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -12,17 +13,16 @@ group = 'ru.mentee.power'
 version = '1.0-SNAPSHOT'
 
 ext {
-    junitVersion = '5.10.0'
+    junitVersion = '5.10.0' // или новее
     assertjVersion = '3.25.3'
-    servletVersion = '6.1.0'
+    servletVersion = '6.1.0' // Tomcat 11 / Servlet 6 актуальны для SB 4
     tomcatVersion = '11.0.1'
     jteVersion = '3.1.15'
-    springBootVersion = '3.2.0'
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
+        languageVersion = JavaLanguageVersion.of(25) // Оставляем Java 25
     }
 }
 
@@ -35,40 +35,47 @@ repositories {
 }
 
 dependencies {
-    testImplementation platform("org.junit:junit-bom:${junitVersion}")
-    testImplementation "org.junit.jupiter:junit-jupiter"
-    testImplementation "org.assertj:assertj-core:${assertjVersion}"
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    testImplementation 'org.mockito:mockito-core:5.21.0'
-    testImplementation 'org.mockito:mockito-junit-jupiter:5.21.0'
-    implementation "jakarta.servlet:jakarta.servlet-api:${servletVersion}"
-    implementation "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
+    // ВНИМАНИЕ: Мы НЕ указываем версии для стартеров Spring Boot.
+    // Плагин 4.0.2 и dependency-management сами подтянут идеальные версии.
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // JTE
     implementation "gg.jte:jte:${jteVersion}"
     implementation "gg.jte:jte-runtime:${jteVersion}"
-    implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+    // Для JTE стартера лучше тоже использовать версию, совпадающую с ядром JTE
+    implementation "gg.jte:jte-spring-boot-starter-3:${jteVersion}"
+
+    // Servlet & Tomcat (если они действительно нужны явно, Spring Boot обычно тянет их сам)
+    implementation "jakarta.servlet:jakarta.servlet-api:${servletVersion}"
+    implementation "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
+
+    // Тесты
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
+    testImplementation 'org.mockito:mockito-core:5.21.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.21.0'
 }
 
 checkstyle {
-    toolVersion = '13.0.0'  // актуальная версия на 2025 год для Gradle 9.1
-    maxErrors = 0      // даже 1 ошибка (severity=error) → BUILD FAILED
-    maxWarnings = 999  // предупреждения (severity=warning) не блокируют сборку
-    // configFile = file("${rootDir}/config/checkstyle/checkstyle.xml") // опционально, custom config
+    toolVersion = '13.0.0'
+    maxErrors = 0
+    maxWarnings = 999
 }
 
-// Настройка JaCoCo
 jacoco {
-    toolVersion = '0.8.14'  // актуальная версия на 2025 год с поддержкой Java 25
+    toolVersion = '0.8.14' // Оставляем 0.8.14 (с поддержкой Java 25)
 }
 
-// Настройка тестов
 test {
     useJUnitPlatform()
-    finalizedBy jacocoTestReport  // генерировать отчёт после тестов
+    finalizedBy jacocoTestReport
 }
 
-// Настройка JaCoCo отчёта
 jacocoTestReport {
-    dependsOn test  // отчёт генерируется после выполнения тестов
+    dependsOn test
     reports {
         xml.required = false
         csv.required = false
@@ -77,25 +84,19 @@ jacocoTestReport {
     }
 }
 
-// Настройка проверки покрытия (минимум 80%)
 jacocoTestCoverageVerification {
     dependsOn jacocoTestReport
     violationRules {
         rule {
             limit {
-                minimum = 0.70  // 70% покрытия инструкций
+                minimum = 0.70
             }
         }
     }
 }
 
-// Интеграция проверок в lifecycle
 check {
     dependsOn jacocoTestCoverageVerification
-}
-
-test {
-    useJUnitPlatform()
 }
 
 jte {
@@ -108,7 +109,7 @@ task bootRun8081(type: org.springframework.boot.gradle.tasks.run.BootRun) {
     group = 'application'
     description = 'Run Spring Boot on port 8081'
 
-    mainClass = 'ru.mentee.power.crm.spring.Application'
+    mainClass = 'ru.mentee.power.crm.Application'
     classpath = sourceSets.main.runtimeClasspath
 
     jvmArgs = [
