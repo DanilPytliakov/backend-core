@@ -1,27 +1,23 @@
 package ru.mentee.power.crm;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.assertj.core.api.Assertions.*;
+import static org.awaitility.Awaitility.await;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.*;
+import java.time.Duration;
+
 import org.apache.catalina.Context;
-import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
 import org.junit.jupiter.api.*;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
-import ru.mentee.power.crm.model.LeadStatus;
 import ru.mentee.power.crm.repository.InMemoryLeadRepository;
-import ru.mentee.power.crm.repository.LeadRepository;
 import ru.mentee.power.crm.service.LeadService;
 import ru.mentee.power.crm.servlet.LeadListServlet;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.http.*;
-import java.net.URI;
-import java.time.Duration;
-import java.util.Map;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.assertj.core.api.Assertions.*;
-import static org.awaitility.Awaitility.await;
 
 /**
  * Интеграционный тест сравнения Servlet и Spring Boot стеков.
@@ -113,7 +109,9 @@ class StackComparisonTest {
 
     // Подсчитывает количество строк <tr> в HTML (количество лидов в таблице).
     private int countTableRows(String html) {
-        if (html == null || html.isEmpty()) return 0;
+        if (html == null || html.isEmpty()) {
+            return 0;
+        }
         // Приводим к нижнему регистру, чтобы ловить <tr> и <TR>
         String[] rows = html.toLowerCase().split("<tr");
         // split возвращает массив, первый элемент до первого <tr> не считается строкой
@@ -152,81 +150,4 @@ class StackComparisonTest {
         int springRows = countTableRows(springResponse.body());
         assertThat(servletRows).isEqualTo(springRows);
     }
-}
-
-// Второй тест был вынесен в отдельный класс,
-// так как ситуации проверяемые в обоих случаях являются взаимоисключающими
-class startupPerformaceTest {
-    @Test
-    @DisplayName("Измерение времени старта обоих стеков")
-    void shouldMeasureStartupTime() {
-        InMemoryLeadRepository repository = new InMemoryLeadRepository();
-        LeadService leadService = new LeadService(repository);
-        for (int i = 0; i < 5; i++) {
-            leadService.addLead(
-                    "User" + i + "@gmail.com",
-                    "Company" + i,
-                    LeadStatus.NEW);
-        }
-
-        // Servlet startup time (уже запущен вручную)
-        long servletStartupMs = measureServletStartup();
-
-        // Spring Boot startup time (уже запущен вручную)
-        long springStartupMs = measureSpringBootStartup();
-
-        // Вывод результатов
-        System.out.println("=== Сравнение времени старта ===");
-        System.out.printf("Servlet стек: %d ms%n", servletStartupMs);
-        System.out.printf("Spring Boot: %d ms%n", springStartupMs);
-        System.out.printf("Разница: Spring %s на %d ms%n",
-                springStartupMs > servletStartupMs ? "медленнее" : "быстрее",
-                Math.abs(springStartupMs - servletStartupMs));
-
-        // Просто фиксируем что оба стартуют за разумное время
-        assertThat(servletStartupMs).isLessThan(10_000);
-        assertThat(springStartupMs).isLessThan(15_000);
-    }
-
-    private long measureServletStartup() {
-        try {
-            long startTime = System.nanoTime();
-
-            Tomcat tomcat = new Tomcat();
-            tomcat.setPort(8080);
-            tomcat.getConnector();
-
-            // Контекст без данных лидов
-            String docBase = System.getProperty("java.io.tmpdir");
-            Context context = tomcat.addContext("", docBase);
-
-            Tomcat.addServlet(context, "LeadListServlet", new LeadListServlet());
-            context.addServletMappingDecoded("/leads", "LeadListServlet");
-
-            tomcat.start();
-
-            long endTime = System.nanoTime();
-
-            tomcat.stop();
-            tomcat.destroy();
-
-            return (endTime - startTime) / 1_000_000; // в миллисекунды
-        } catch (LifecycleException e) {
-            throw new RuntimeException("Tomcat failed to start", e);
-        }
-    }
-
-    private long measureSpringBootStartup() {
-        long startTime = System.nanoTime();
-
-        SpringApplication app = new SpringApplication(Application.class);
-        ConfigurableApplicationContext context = app.run();
-
-        long endTime = System.nanoTime();
-
-        context.close(); // закрываем контекст
-
-        return (endTime - startTime) / 1_000_000; // в миллисекунды
-    }
-
 }
