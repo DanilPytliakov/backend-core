@@ -6,24 +6,33 @@
 @param LeadStatus currentFilter
 
 @template.layout.main(content = @`
-    <div class="mb-4 flex gap-2">
-        <a href="/leads"
-           class="px-4 py-2 rounded ${currentFilter == null ? "bg-blue-500 text-white" : "bg-gray-200"}">
-            Все
-        </a>
-        <a href="/leads?status=NEW"
-           class="px-4 py-2 rounded ${currentFilter == LeadStatus.NEW ? "bg-blue-500 text-white" : "bg-gray-200"}">
-            NEW
-        </a>
-        <a href="/leads?status=CONTACTED"
-           class="px-4 py-2 rounded ${currentFilter == LeadStatus.CONTACTED ? "bg-blue-500 text-white" : "bg-gray-200"}">
-            CONTACTED
-        </a>
-        <a href="/leads?status=QUALIFIED"
-           class="px-4 py-2 rounded ${currentFilter == LeadStatus.QUALIFIED ? "bg-blue-500 text-white" : "bg-gray-200"}">
-            QUALIFIED
+    <div class="mb-4 flex justify-between items-center">
+        <div class="mb-4 flex gap-2">
+            <a href="/leads"
+               class="px-4 py-2 rounded ${currentFilter == null ? "bg-blue-500 text-white" : "bg-gray-200"}">
+                Все
+            </a>
+            <a href="/leads?status=NEW"
+               class="px-4 py-2 rounded ${currentFilter == LeadStatus.NEW ? "bg-blue-500 text-white" : "bg-gray-200"}">
+                NEW
+            </a>
+            <a href="/leads?status=CONTACTED"
+               class="px-4 py-2 rounded ${currentFilter == LeadStatus.CONTACTED ? "bg-blue-500 text-white" : "bg-gray-200"}">
+                CONTACTED
+            </a>
+            <a href="/leads?status=QUALIFIED"
+               class="px-4 py-2 rounded ${currentFilter == LeadStatus.QUALIFIED ? "bg-blue-500 text-white" : "bg-gray-200"}">
+                QUALIFIED
+            </a>
+        </div>
+        <a
+                href="/leads/new"
+                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+        >
+            + Добавить лида
         </a>
     </div>
+
 
     @if(currentFilter != null)
         <p class="text-sm text-gray-600 mb-2">

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import ru.mentee.power.crm.model.Lead;
+import ru.mentee.power.crm.model.LeadStatus;
 import ru.mentee.power.crm.service.LeadService;
 
 @Controller
@@ -15,6 +16,12 @@ public class LeadController {
 
     public LeadController(LeadService leadService) {
         this.leadService = leadService;
+    }
+
+    @GetMapping("/leads/new")
+    public String showCreateForm(Model model) {
+        model.addAttribute("lead", new Lead("", "", LeadStatus.NEW));
+        return "leads/create"; // JTE шаблон leads/create.jte
     }
 
     @GetMapping("/leads")
