@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.model.LeadStatus;
 import ru.mentee.power.crm.service.LeadService;
@@ -22,6 +24,17 @@ public class LeadController {
     public String showCreateForm(Model model) {
         model.addAttribute("lead", new Lead("", "", LeadStatus.NEW));
         return "leads/create"; // JTE шаблон leads/create.jte
+    }
+
+    // Обработчик POST формы
+    @PostMapping("/leads")
+    public String createLead(
+            @RequestParam String email,
+            @RequestParam String company,
+            @RequestParam LeadStatus status
+    ) {
+        leadService.addLead(email, company, status);
+        return "redirect:/leads";  // После создания возвращаемся к списку
     }
 
     @GetMapping("/leads")
