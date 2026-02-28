@@ -118,4 +118,81 @@ class LeadServiceTest {
                 .isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("Поле с названием компани не должно быть null");
     }
+
+    // Метод для создания Лидов с конкретным параметром, конкретное количество раз
+    private void addLeads(LeadService service, int count, LeadStatus status) {
+        for (int i = 0; i < count; i++) {
+            service.addLead(
+                    "user" + status + i + "@gmail.com",
+                    "Company" + i,
+                    status
+            );
+        }
+    }
+
+    @Test
+    void shouldReturnOnlyNewLeads_whenFindByStatusNew() {
+        // Given
+        InMemoryLeadRepository repository = new InMemoryLeadRepository();
+        LeadService leadService = new LeadService(repository);
+
+        addLeads(leadService, 3, LeadStatus.NEW);
+        addLeads(leadService, 5, LeadStatus.CONTACTED);
+        addLeads(leadService, 2, LeadStatus.QUALIFIED);
+
+        // When
+        List<Lead> result = leadService.findByStatus(LeadStatus.NEW);
+
+        // Then
+        assertThat(result).hasSize(3);
+        assertThat(result).allMatch(lead -> lead.status().equals(LeadStatus.NEW));
+    }
+
+    @Test
+    void shouldReturnEmptyList_whenNoLeadsWithStatusQualified() {
+        // Given
+        InMemoryLeadRepository repository = new InMemoryLeadRepository();
+        LeadService leadService = new LeadService(repository);
+
+        addLeads(leadService, 3, LeadStatus.NEW);
+        addLeads(leadService, 5, LeadStatus.CONTACTED);
+
+        // When
+        List<Lead> result = leadService.findByStatus(LeadStatus.QUALIFIED);
+
+        // Then
+        assertThat(result).hasSize(0);
+    }
+
+    @Test
+    void shouldReturnEmptyList_whenNoLeadsWithStatusNew() {
+        // Given
+        InMemoryLeadRepository repository = new InMemoryLeadRepository();
+        LeadService leadService = new LeadService(repository);
+
+        addLeads(leadService, 3, LeadStatus.QUALIFIED);
+        addLeads(leadService, 5, LeadStatus.CONTACTED);
+
+        // When
+        List<Lead> result = leadService.findByStatus(LeadStatus.NEW);
+
+        // Then
+        assertThat(result).hasSize(0);
+    }
+
+    @Test
+    void shouldReturnEmptyList_whenNoLeadsWithStatusContacted() {
+        // Given
+        InMemoryLeadRepository repository = new InMemoryLeadRepository();
+        LeadService leadService = new LeadService(repository);
+
+        addLeads(leadService, 3, LeadStatus.NEW);
+        addLeads(leadService, 5, LeadStatus.QUALIFIED);
+
+        // When
+        List<Lead> result = leadService.findByStatus(LeadStatus.CONTACTED);
+
+        // Then
+        assertThat(result).hasSize(0);
+    }
 }
