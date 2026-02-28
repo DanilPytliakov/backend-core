@@ -4,7 +4,6 @@ plugins {
     id 'checkstyle'
     id 'jacoco'
     id 'gg.jte.gradle' version '3.1.15'
-    // Ставим реально существующую последнюю версию:
     id 'org.springframework.boot' version '3.5.0'
     id 'io.spring.dependency-management' version '1.1.7'
 }
@@ -35,15 +34,13 @@ repositories {
 }
 
 dependencies {
-    // ВНИМАНИЕ: Мы НЕ указываем версии для стартеров Spring Boot.
-    // Плагин 4.0.2 и dependency-management сами подтянут идеальные версии.
+    // Spring Boot.
     implementation 'org.springframework.boot:spring-boot-starter-web'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     // JTE
     implementation "gg.jte:jte:${jteVersion}"
     implementation "gg.jte:jte-runtime:${jteVersion}"
-    // Для JTE стартера лучше тоже использовать версию, совпадающую с ядром JTE
     implementation "gg.jte:jte-spring-boot-starter-3:${jteVersion}"
 
     // Servlet & Tomcat (если они действительно нужны явно, Spring Boot обычно тянет их сам)
