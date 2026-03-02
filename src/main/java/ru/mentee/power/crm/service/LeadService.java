@@ -7,23 +7,23 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.model.LeadStatus;
 import ru.mentee.power.crm.repository.LeadRepository;
 import ru.mentee.power.crm.repository.RepositoryInterface;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Service
 public class LeadService {
 
     private final RepositoryInterface repositoryInterface;
-    private static final Logger log = LoggerFactory.getLogger(LeadService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LeadService.class);
 
     public LeadService(LeadRepository repository) {
         this.repositoryInterface = repository;
-        log.info("LeadService constructor called");
+        LOG.info("LeadService constructor called");
     }
 
     public Lead addLead(String email, String company, LeadStatus status) {
@@ -47,7 +47,7 @@ public class LeadService {
 
     @PostConstruct
     void init() {
-        log.info("LeadService @PostConstruct init() called - Bean lifecycle phase");
+        LOG.info("LeadService @PostConstruct init() called - Bean lifecycle phase");
     }
 
     public List<Lead> findAll() {
