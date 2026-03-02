@@ -14,13 +14,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.model.LeadStatus;
-import ru.mentee.power.crm.repository.InMemoryLeadRepository;
+import ru.mentee.power.crm.repository.LeadRepository;
 
 @ExtendWith(MockitoExtension.class)
 class LeadServiceMockTest {
 
     @Mock
-    private InMemoryLeadRepository mockRepository;
+    private LeadRepository mockRepository;
 
     private LeadService service;
 
