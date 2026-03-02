@@ -9,16 +9,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.model.LeadStatus;
-import ru.mentee.power.crm.repository.InMemoryLeadRepository;
+import ru.mentee.power.crm.repository.LeadRepository;
 
 class LeadServiceTest {
 
     private LeadService service;
-    private InMemoryLeadRepository repository;
+    private LeadRepository repository;
 
     @BeforeEach
     void setUp() {
-        repository = new InMemoryLeadRepository();
+        repository = new LeadRepository();
         service = new LeadService(repository);
     }
 
@@ -133,7 +133,7 @@ class LeadServiceTest {
     @Test
     void shouldReturnOnlyNewLeads_whenFindByStatusNew() {
         // Given
-        InMemoryLeadRepository repository = new InMemoryLeadRepository();
+        LeadRepository repository = new LeadRepository();
         LeadService leadService = new LeadService(repository);
 
         addLeads(leadService, 3, LeadStatus.NEW);
@@ -151,7 +151,7 @@ class LeadServiceTest {
     @Test
     void shouldReturnEmptyList_whenNoLeadsWithStatusQualified() {
         // Given
-        InMemoryLeadRepository repository = new InMemoryLeadRepository();
+        LeadRepository repository = new LeadRepository();
         LeadService leadService = new LeadService(repository);
 
         addLeads(leadService, 3, LeadStatus.NEW);
@@ -167,7 +167,7 @@ class LeadServiceTest {
     @Test
     void shouldReturnEmptyList_whenNoLeadsWithStatusNew() {
         // Given
-        InMemoryLeadRepository repository = new InMemoryLeadRepository();
+        LeadRepository repository = new LeadRepository();
         LeadService leadService = new LeadService(repository);
 
         addLeads(leadService, 3, LeadStatus.QUALIFIED);
@@ -183,7 +183,7 @@ class LeadServiceTest {
     @Test
     void shouldReturnEmptyList_whenNoLeadsWithStatusContacted() {
         // Given
-        InMemoryLeadRepository repository = new InMemoryLeadRepository();
+        LeadRepository repository = new LeadRepository();
         LeadService leadService = new LeadService(repository);
 
         addLeads(leadService, 3, LeadStatus.NEW);

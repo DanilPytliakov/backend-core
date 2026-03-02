@@ -15,7 +15,7 @@ import org.apache.catalina.startup.Tomcat;
 import org.junit.jupiter.api.*;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
-import ru.mentee.power.crm.repository.InMemoryLeadRepository;
+import ru.mentee.power.crm.repository.LeadRepository;
 import ru.mentee.power.crm.service.LeadService;
 import ru.mentee.power.crm.servlet.LeadListServlet;
 
@@ -36,7 +36,7 @@ class StackComparisonTest {
     @BeforeAll
      void startServers() throws Exception {
         // Поднимаем Tomcat
-        InMemoryLeadRepository repository = new InMemoryLeadRepository();
+        LeadRepository repository = new LeadRepository();
         LeadService leadService = new LeadService(repository);
 
         tomcat = new Tomcat();

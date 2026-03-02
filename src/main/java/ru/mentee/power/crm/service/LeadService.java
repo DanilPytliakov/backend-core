@@ -6,24 +6,29 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.model.LeadStatus;
-import ru.mentee.power.crm.repository.InMemoryLeadRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
+import ru.mentee.power.crm.repository.RepositoryInterface;
 
 @Service
 public class LeadService {
 
-    private final LeadRepository repository;
+    private final RepositoryInterface repositoryInterface;
+    private static final Logger LOG = LoggerFactory.getLogger(LeadService.class);
 
-    public LeadService(InMemoryLeadRepository repository) {
-        this.repository = repository;
+    public LeadService(LeadRepository repository) {
+        this.repositoryInterface = repository;
+        LOG.info("LeadService constructor called");
     }
 
     public Lead addLead(String email, String company, LeadStatus status) {
         // Бизнес-правило: проверка уникальности email
-        Optional<Lead> existing = repository.findByEmail(email);
+        Optional<Lead> existing = repositoryInterface.findByEmail(email);
         if (existing.isPresent()) {
             throw new IllegalStateException("Lead with email already exists: " + email);
         }
@@ -37,23 +42,28 @@ public class LeadService {
         );
 
         // Сохраняем через repository
-        return repository.save(lead);
+        return repositoryInterface.save(lead);
+    }
+
+    @PostConstruct
+    void init() {
+        LOG.info("LeadService @PostConstruct init() called - Bean lifecycle phase");
     }
 
     public List<Lead> findAll() {
-        return new ArrayList<Lead>(repository.findAll());
+        return new ArrayList<Lead>(repositoryInterface.findAll());
     }
 
     public Optional<Lead> findById(UUID id) {
-        return repository.findById(id);
+        return repositoryInterface.findById(id);
     }
 
     public Optional<Lead> findByEmail(String email) {
-        return repository.findByEmail(email);
+        return repositoryInterface.findByEmail(email);
     }
 
     public List<Lead> findByStatus(LeadStatus status) {
-        return repository.findAll().stream()
+        return repositoryInterface.findAll().stream()
                 .filter(lead -> lead.status().equals(status))
                 .collect(Collectors.toList());
     }

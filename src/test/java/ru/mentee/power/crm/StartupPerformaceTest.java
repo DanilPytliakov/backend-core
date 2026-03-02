@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import ru.mentee.power.crm.model.LeadStatus;
-import ru.mentee.power.crm.repository.InMemoryLeadRepository;
+import ru.mentee.power.crm.repository.LeadRepository;
 import ru.mentee.power.crm.service.LeadService;
 import ru.mentee.power.crm.servlet.LeadListServlet;
 
@@ -20,7 +20,7 @@ class StartupPerformaceTest {
     @Test
     @DisplayName("Измерение времени старта обоих стеков")
     void shouldMeasureStartupTime() {
-        InMemoryLeadRepository repository = new InMemoryLeadRepository();
+        LeadRepository repository = new LeadRepository();
         LeadService leadService = new LeadService(repository);
         for (int i = 0; i < 5; i++) {
             leadService.addLead(

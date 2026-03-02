@@ -9,12 +9,12 @@ import org.junit.jupiter.api.Test;
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.model.LeadStatus;
 
-class InMemoryLeadRepositoryTest {
-    private InMemoryLeadRepository repository;
+class LeadRepositoryInterfaceTest {
+    private LeadRepository repository;
 
     @BeforeEach
     void setUp() {
-        repository = new InMemoryLeadRepository();
+        repository = new LeadRepository();
     }
 
     @Test
