@@ -26,6 +26,6 @@ class LeadControllerTest {
                 // Then status 200 OK
                 .andExpect(status().isOk())
                 // And response contains "email"
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Email")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Почтовый адрес")));
     }
 }
