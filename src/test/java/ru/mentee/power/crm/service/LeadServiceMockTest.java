@@ -61,10 +61,13 @@ class LeadServiceMockTest {
         when(mockRepository.findByEmail("existing@example.com"))
                 .thenReturn(Optional.of(existingLead));
 
-        // When/Then: ожидаем исключение
-        assertThatThrownBy(() ->
-                service.addLead("existing@example.com", "New Company", LeadStatus.NEW)
-        ).isInstanceOf(IllegalStateException.class);
+        // When/Then: ожидаем null
+        assertThat(
+                service.addLead(
+                        "existing@example.com",
+                        "New Company",
+                        LeadStatus.NEW))
+                .isNull();
 
         // Then: save() НЕ должен быть вызван
         verify(mockRepository, never()).save(any(Lead.class));

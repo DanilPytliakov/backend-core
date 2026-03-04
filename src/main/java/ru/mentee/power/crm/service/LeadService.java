@@ -29,20 +29,22 @@ public class LeadService {
     public Lead addLead(String email, String company, LeadStatus status) {
         // Бизнес-правило: проверка уникальности email
         Optional<Lead> existing = repositoryInterface.findByEmail(email);
+
         if (existing.isPresent()) {
-            throw new IllegalStateException("Lead with email already exists: " + email);
+            return null;
         }
+        else {
+            // Создаём нового лида
+            Lead lead = new Lead(
+                    UUID.randomUUID(),
+                    email,
+                    company,
+                    status
+            );
 
-        // Создаём нового лида
-        Lead lead = new Lead(
-                UUID.randomUUID(),
-                email,
-                company,
-                status
-        );
-
-        // Сохраняем через repository
-        return repositoryInterface.save(lead);
+            // Сохраняем через repository
+            return repositoryInterface.save(lead);
+        }
     }
 
     @PostConstruct
@@ -66,6 +68,14 @@ public class LeadService {
         return repositoryInterface.findAll().stream()
                 .filter(lead -> lead.status().equals(status))
                 .collect(Collectors.toList());
+    }
+
+    public void updateLead(UUID id, String email, String company, LeadStatus status) {
+        Optional<Lead> existing = repositoryInterface.findById(id);
+        if (existing.isPresent()) {
+            Lead updated = new Lead(id, email, company, status);
+            repositoryInterface.save(updated);
+        }
     }
 
 }

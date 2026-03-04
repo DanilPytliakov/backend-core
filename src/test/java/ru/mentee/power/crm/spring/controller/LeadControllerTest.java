@@ -1,8 +1,8 @@
 package ru.mentee.power.crm.spring.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +17,139 @@ class LeadControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    // ───── showLeads ─────
+
     @Test
     void givenSpringContext_whenGetLeads_thenStatus200AndContainsEmail() throws Exception {
-        // Given Spring context is loaded
+        // Given: Spring контекст загружен
 
-        // When GET /leads
+        // When,Then
         mockMvc.perform(get("/leads"))
-                // Then status 200 OK
+                // статус 200 OK
                 .andExpect(status().isOk())
-                // And response contains "email"
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Email")));
+                // ответ содержит заголовок колонки
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Почтовый адрес")));
+    }
+
+    @Test
+    void givenValidStatus_whenGetLeadsWithFilter_thenStatus200AndContainsFilter() throws Exception {
+        // Given: корректный фильтр по статусу NEW
+
+        // Когда: GET /leads?status=NEW
+        mockMvc.perform(get("/leads").param("status", "NEW"))
+                // Тогда: статус 200 OK
+                .andExpect(status().isOk())
+                // И: ответ содержит указание на фильтр
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("NEW")));
+    }
+
+    @Test
+    void givenInvalidStatus_whenGetLeadsWithFilter_thenStatus400() throws Exception {
+        // Given: некорректное значение статуса
+
+        // When: GET /leads?status=INVALID
+        mockMvc.perform(get("/leads").param("status", "INVALID"))
+                // Then: статус 400 Bad Request
+                .andExpect(status().isBadRequest());
+    }
+
+    // ───── showCreateForm ─────
+
+    @Test
+    void givenSpringContext_whenGetLeadsNew_thenStatus200AndContainsForm() throws Exception {
+        // Given: Spring контекст загружен
+
+        // When,Then GET /leads/new
+        mockMvc.perform(get("/leads/new"))
+                // статус 200 OK
+                .andExpect(status().isOk())
+                // ответ содержит элементы формы
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Добавить")));
+    }
+
+    // ───── createLead ─────
+
+    @Test
+    void givenValidLead_whenPostLeads_thenRedirectToList() throws Exception {
+        // Given: корректные данные нового лида
+
+        // When: POST /leads
+        mockMvc.perform(post("/leads")
+                        .param("email", "test@company.com")
+                        .param("company", "TestCorp")
+                        .param("status", "NEW"))
+                // Тогда: редирект на /leads
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/leads"));
+    }
+
+    @Test
+    void givenDuplicateEmail_whenPostLeads_thenStayOnCreatePage() throws Exception {
+        // Given: лид с таким email уже существует
+        mockMvc.perform(post("/leads")
+                .param("email", "duplicate@company.com")
+                .param("company", "Corp")
+                .param("status", "NEW"));
+
+        // When: POST /leads с тем же email
+        mockMvc.perform(post("/leads")
+                        .param("email", "duplicate@company.com")
+                        .param("company", "AnotherCorp")
+                        .param("status", "CONTACTED"))
+                // Then: остаёмся на странице создания
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Добавить")));
+    }
+
+    // ───── showLeadUpdating ─────
+
+    @Test
+    void givenNonExistentId_whenGetLeadEdit_thenShowListWithNotFoundMessage() throws Exception {
+        // Дано: несуществующий UUID
+        String nonExistentId = "00000000-0000-0000-0000-000000000000";
+
+        // Когда: GET /leads/{id}/edit
+        mockMvc.perform(get("/leads/" + nonExistentId + "/edit"))
+                // Тогда: остаёмся на странице списка
+                .andExpect(status().isOk())
+                // И: отображается сообщение об ошибке
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Не удалось найти")));
+    }
+
+    @Test
+    void givenExistingLead_whenGetLeadEdit_thenStatus200AndContainsForm() throws Exception {
+        // Given: существующий лид
+        mockMvc.perform(post("/leads")
+                .param("email", "edit@company.com")
+                .param("company", "EditCorp")
+                .param("status", "NEW"));
+
+        // When: GET /leads — проверяем что лид отображается в списке
+        mockMvc.perform(get("/leads"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("edit@company.com")));
+    }
+
+    // ───── updateLead ─────
+
+    @Test
+    void givenExistingLead_whenPostLeadEdit_thenRedirectToList() throws Exception {
+        // Given: создаём лида
+        mockMvc.perform(post("/leads")
+                .param("email", "update@company.com")
+                .param("company", "UpdateCorp")
+                .param("status", "NEW"));
+
+        // Используем валидный UUID (сервис обработает отсутствие лида корректно)
+        String anyValidId = "00000000-0000-0000-0000-000000000001";
+
+        // When: POST /leads/{id}/edit
+        mockMvc.perform(post("/leads/" + anyValidId + "/edit")
+                        .param("email", "updated@company.com")
+                        .param("company", "UpdatedCorp")
+                        .param("status", "CONTACTED"))
+                // Then: редирект на /leads
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/leads"));
     }
 }

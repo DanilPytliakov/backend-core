@@ -41,17 +41,16 @@ class LeadServiceTest {
     }
 
     @Test
-    void shouldThrowException_whenEmailAlreadyExists() {
+    void shouldThrowNull_whenEmailAlreadyExists() {
         // Given
         String email = "duplicate@example.com";
         service.addLead(email, "First Company", LeadStatus.NEW);
 
-        // When/Then
-        assertThatThrownBy(() ->
-                service.addLead(email, "Second Company", LeadStatus.NEW)
-        )
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Lead with email already exists");
+        // When
+        Lead lead = service.addLead(email, "Second Company", LeadStatus.NEW);
+
+        //Then
+        assertThat(lead).isNull();
     }
 
     @Test
