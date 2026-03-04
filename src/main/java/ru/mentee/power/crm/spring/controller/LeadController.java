@@ -71,13 +71,14 @@ public class LeadController {
     @GetMapping("/leads/{id}/edit")
     public String showLeadUpdating(@PathVariable UUID id, Model model) {
         Optional<Lead> lead = leadService.findById(id);
-        if(lead.isPresent()) {
+        if (lead.isPresent()) {
             model.addAttribute("lead", lead.get());
-            return "leads/edit"; // Переход на страницу редактирования
-        }
-        else{
+            return "leads/edit";
+        } else {
+            model.addAttribute("leads", leadService.findAll()); // <-- добавь это
             model.addAttribute("leadNotFound", true);
-            return "leads/list"; // Остаёмся на странице списка лидов
+            model.addAttribute("currentFilter", null);
+            return "leads/list";
         }
     }
 
