@@ -22,6 +22,9 @@ public class LeadController {
 
     public LeadController(LeadService leadService) {
         this.leadService = leadService;
+        for (int i = 0; i < 5; i++) {
+            leadService.addLead("example" + i + "@gmail.com", "Company" + i, LeadStatus.NEW);
+        }
     }
 
     // Главная страница с лидами
@@ -46,11 +49,12 @@ public class LeadController {
     // Переадресация на страницу создания нового лида
     @GetMapping("/leads/new")
     public String showCreateForm(Model model) {
+        // Просто создаём пустую форму — данные после ошибки
+        // придут через redirect attributes или flash scope
         model.addAttribute("lead", new Lead("", "", LeadStatus.NEW));
         return "leads/create";
     }
 
-    // Обработчик POST формы
     @PostMapping("/leads")
     public String createLead(
             @RequestParam String email,
@@ -58,12 +62,14 @@ public class LeadController {
             @RequestParam LeadStatus status,
             Model model
     ) {
-        if(!Objects.equals(leadService.addLead(email, company, status), null)) {
-            leadService.addLead(email, company, status);
-            return "redirect:/leads";  // После создания возвращаемся к списку
-        } else{
+        Optional<Lead> result = leadService.addLead(email, company, status);
+        if (result.isPresent()) {
+            return "redirect:/leads";
+        } else {
+            // Передаём введённые данные обратно в форму
             model.addAttribute("leadAlreadyExist", true);
-            return "leads/create"; // Остаёмся на странице списка лидов
+            model.addAttribute("lead", new Lead(email, company, status));
+            return "leads/create";
         }
     }
 
@@ -75,7 +81,7 @@ public class LeadController {
             model.addAttribute("lead", lead.get());
             return "leads/edit";
         } else {
-            model.addAttribute("leads", leadService.findAll()); // <-- добавь это
+            model.addAttribute("leads", leadService.findAll());
             model.addAttribute("leadNotFound", true);
             model.addAttribute("currentFilter", null);
             return "leads/list";
@@ -90,6 +96,12 @@ public class LeadController {
             @RequestParam LeadStatus status
     ) {
         leadService.updateLead(id, email, company, status);
+        return "redirect:/leads";
+    }
+
+    @PostMapping("/leads/{id}/delete")
+    public String deleteLead(@PathVariable UUID id) {
+        leadService.deleteLead(id);
         return "redirect:/leads";
     }
 }

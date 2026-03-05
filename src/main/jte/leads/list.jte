@@ -82,10 +82,17 @@
 
     <div id="action-bar" class="hidden mt-4 flex gap-3">
         <a id="edit-btn"
-           href="/leads/{id}/edit"
+           href="#"
            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-            ✏️ Редактировать
+            Редактировать
         </a>
+        <form id="delete-form" method="post" action="#" class="inline">
+            <button type="submit"
+                    onclick="return confirm('Вы уверены что хотите удалить лида?')"
+                    class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                Удалить
+            </button>
+        </form>
         <button onclick="cancelSelection()"
                 class="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400">
             ✕ Отмена
@@ -111,6 +118,7 @@
         row.classList.add('bg-blue-100');
 
         document.getElementById('edit-btn').href = '/leads/' + id + '/edit';
+        document.getElementById('delete-form').action = '/leads/' + id + '/delete';
         document.getElementById('action-bar').classList.remove('hidden');
         }
 
@@ -121,5 +129,6 @@
             }
         document.getElementById('action-bar').classList.add('hidden');
         }
+
 </script>
 `)

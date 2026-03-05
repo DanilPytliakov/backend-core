@@ -40,7 +40,7 @@ class LeadServiceMockTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When: вызываем бизнес-метод
-        Lead result = service.addLead("new@example.com", "Company", LeadStatus.NEW);
+        Lead result = service.addLead("new@example.com", "Company", LeadStatus.NEW).get();
 
         // Then: проверяем что Repository.save() был вызван ровно 1 раз
         verify(mockRepository, times(1)).save(any(Lead.class));
@@ -61,13 +61,14 @@ class LeadServiceMockTest {
         when(mockRepository.findByEmail("existing@example.com"))
                 .thenReturn(Optional.of(existingLead));
 
-        // When/Then: ожидаем null
+        // When/Then: ожидаем пустой лид
         assertThat(
                 service.addLead(
                         "existing@example.com",
                         "New Company",
-                        LeadStatus.NEW))
-                .isNull();
+                        LeadStatus.NEW)
+                        .isPresent())
+                .isFalse();
 
         // Then: save() НЕ должен быть вызван
         verify(mockRepository, never()).save(any(Lead.class));

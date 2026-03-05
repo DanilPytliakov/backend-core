@@ -34,6 +34,7 @@
                         id="email"
                         name="email"
                         required
+                        value="${lead.email()}"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                         placeholder="example@company.com"
                 />
@@ -49,6 +50,7 @@
                         id="company"
                         name="company"
                         required
+                        value="${lead.company()}"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                         placeholder="Название компании"
                 />
@@ -63,10 +65,15 @@
                         id="status"
                         name="status"
                         required
+
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                 >
-                    @for (var status : LeadStatus.values())
-                        <option value="${status}">${status}</option>
+                    @for(var status : LeadStatus.values())
+                        @if(status == lead.status())
+                            <option value="${status}" selected>${status}</option>
+                        @else
+                            <option value="${status}">${status}</option>
+                        @endif
                     @endfor
                 </select>
             </div>
