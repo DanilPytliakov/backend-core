@@ -30,7 +30,7 @@ class LeadServiceTest {
         LeadStatus status = LeadStatus.NEW;
 
         // When
-        Lead result = service.addLead(email, company, status);
+        Lead result = service.addLead(email, company, status).get();
 
         // Then
         assertThat(result).isNotNull();
@@ -47,10 +47,10 @@ class LeadServiceTest {
         service.addLead(email, "First Company", LeadStatus.NEW);
 
         // When
-        Lead lead = service.addLead(email, "Second Company", LeadStatus.NEW);
+        Optional<Lead> lead = service.addLead(email, "Second Company", LeadStatus.NEW);
 
         //Then
-        assertThat(lead).isNull();
+        assertThat(lead.isPresent()).isFalse();
     }
 
     @Test
@@ -69,7 +69,7 @@ class LeadServiceTest {
     @Test
     void shouldFindLeadById() {
         // Given
-        Lead created = service.addLead("find@example.com", "Company", LeadStatus.NEW);
+        Lead created = service.addLead("find@example.com", "Company", LeadStatus.NEW).get();
 
         // When
         Optional<Lead> result = service.findById(created.id());

@@ -4,18 +4,21 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.mentee.power.crm.service.LeadService;
 
 @SpringBootTest(properties = "gg.jte.template-location=src/main/jte")
 @AutoConfigureMockMvc
 class LeadControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
+    @Autowired private LeadService leadService;
 
     // ───── showLeads ─────
 
@@ -151,5 +154,29 @@ class LeadControllerTest {
                 // Then: редирект на /leads
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/leads"));
+    }
+
+    @Test
+    void shouldDeleteLeadAndRedirect() throws Exception {
+        // Given: создаём лида
+        mockMvc.perform(post("/leads")
+                .param("email", "example@company.com")
+                .param("company", "Corp")
+                .param("status", "NEW"));
+
+        // Получаем UUID созданного лида
+        UUID id = leadService.findByEmail("example@company.com").get().id();
+
+        // When удаляем по реальному UUID
+        mockMvc.perform(post("/leads/" + id + "/delete"))
+                // Then: редирект на /leads
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/leads"));
+
+        // And лид больше не отображается в списке
+        mockMvc.perform(get("/leads"))
+                .andExpect(content().string(
+                        org.hamcrest.Matchers.not(
+                                org.hamcrest.Matchers.containsString("example@company.com"))));
     }
 }
