@@ -278,4 +278,71 @@ class LeadControllerTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("first@gmail.com")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("second@mail.ru")));
     }
+
+    @Test
+    void givenBlankCompany_whenPostLeads_thenReturnFormWithError() throws Exception {
+        // Given: пустое название компании
+
+        // When: POST /leads с пустой компанией
+        mockMvc.perform(post("/leads")
+                        .param("email", "test@test.com")
+                        .param("company", "")
+                        .param("status", "NEW"))
+                // Then: остаёмся на странице создания
+                .andExpect(view().name("leads/create"))
+                // And: есть ошибка поля company
+                .andExpect(model().attributeHasFieldErrors("leadForm", "company"));
+    }
+
+    @Test
+    void givenInvalidEmail_whenPostLeads_thenReturnFormWithEmailError() throws Exception {
+        // Given: некорректный формат email
+
+        // When: POST /leads с невалидным email
+        mockMvc.perform(post("/leads")
+                        .param("email", "invalidemail")
+                        .param("company", "TestCorp")
+                        .param("status", "NEW"))
+                // Then: остаёмся на странице создания
+                .andExpect(view().name("leads/create"))
+                // And: ошибка формата email
+                .andExpect(model().attributeHasFieldErrorCode("leadForm", "email", "Email"));
+    }
+
+    @Test
+    void givenValidData_whenPostLeads_thenRedirectToList() throws Exception {
+        // Given: все поля заполнены корректно
+
+        // When: POST /leads с валидными данными
+        mockMvc.perform(post("/leads")
+                        .param("email", "valid@company.com")
+                        .param("company", "ValidCorp")
+                        .param("status", "NEW"))
+                // Then: редирект на /leads
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/leads"));
+    }
+
+    @Test
+    void givenInvalidEmail_whenPostLeads_thenEnglishErrorMessage() throws Exception {
+        mockMvc.perform(post("/leads")
+                        .param("email", "invalidemail")
+                        .param("company", "TestCorp")
+                        .param("status", "NEW")
+                        .header("Accept-Language", "en"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(
+                        org.hamcrest.Matchers.containsString("Invalid email format")));
+    }
+    @Test
+    void givenInvalidEmail_whenPostLeads_thenRussianErrorMessage() throws Exception {
+        mockMvc.perform(post("/leads")
+                        .param("email", "invalidemail")
+                        .param("company", "TestCorp")
+                        .param("status", "NEW")
+                        .header("Accept-Language", "ru"))
+                .andExpect(status().isOk())
+                // проверяем код ошибки, а не текст сообщения
+                .andExpect(model().attributeHasFieldErrorCode("leadForm", "email", "Email"));
+    }
 }

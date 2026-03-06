@@ -1,7 +1,9 @@
-@import ru.mentee.power.crm.model.Lead
+@import ru.mentee.power.crm.model.CreateLeadForm
 @import ru.mentee.power.crm.model.LeadStatus
+@import org.springframework.validation.BindingResult
 
-@param Lead lead
+@param CreateLeadForm leadForm
+@param BindingResult errors = null
 @param Boolean leadAlreadyExist = false
 
 @template.layout.main(content = @`
@@ -26,34 +28,34 @@
         <form action="/leads" method="post" class="space-y-4">
             <!-- Email -->
             <div>
-                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
-                    Почта
-                </label>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Почта</label>
                 <input
                         type="email"
                         id="email"
                         name="email"
-                        required
-                        value="${lead.email()}"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                        value="${leadForm.getEmail() != null ? leadForm.getEmail() : ""}"
+                        class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
                         placeholder="example@company.com"
                 />
+                @if(errors != null && errors.hasFieldErrors("email"))
+                    <p class="text-red-600 text-sm mt-1">${errors.getFieldError("email").getDefaultMessage()}</p>
+                @endif
             </div>
 
             <!-- Company -->
             <div>
-                <label for="Company" class="block text-sm font-medium text-gray-700 mb-1">
-                    Компания
-                </label>
+                <label for="company" class="block text-sm font-medium text-gray-700 mb-1">Компания</label>
                 <input
-                        type="company"
+                        type="text"
                         id="company"
                         name="company"
-                        required
-                        value="${lead.company()}"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                        value="${leadForm.getCompany() != null ? leadForm.getCompany() : ""}"
+                        class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
                         placeholder="Название компании"
                 />
+                @if(errors != null && errors.hasFieldErrors("company"))
+                    <p class="text-red-600 text-sm mt-1">${errors.getFieldError("company").getDefaultMessage()}</p>
+                @endif
             </div>
 
             <!-- Status -->
@@ -69,7 +71,7 @@
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                 >
                     @for(var status : LeadStatus.values())
-                        @if(status == lead.status())
+                        @if(status == leadForm.getStatus())
                             <option value="${status}" selected>${status}</option>
                         @else
                             <option value="${status}">${status}</option>
