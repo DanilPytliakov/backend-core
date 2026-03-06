@@ -56,9 +56,11 @@ public class LeadService {
         return repositoryInterface.findByEmail(email);
     }
 
-    public List<Lead> findByStatus(LeadStatus status) {
+    public List<Lead> findByFilter(String email, String company, LeadStatus status) {
         return repositoryInterface.findAll().stream()
-                .filter(lead -> lead.status().equals(status))
+                .filter(lead -> email == null || email.isBlank() || lead.email().contains(email))
+                .filter(lead -> company == null || company.isBlank() || lead.company().contains(company))
+                .filter(lead -> status == null || lead.status().equals(status))
                 .collect(Collectors.toList());
     }
 

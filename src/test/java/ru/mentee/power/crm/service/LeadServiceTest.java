@@ -140,7 +140,7 @@ class LeadServiceTest {
         addLeads(leadService, 2, LeadStatus.QUALIFIED);
 
         // When
-        List<Lead> result = leadService.findByStatus(LeadStatus.NEW);
+        List<Lead> result = leadService.findByFilter(null, null, LeadStatus.NEW);
 
         // Then
         assertThat(result).hasSize(3);
@@ -157,7 +157,7 @@ class LeadServiceTest {
         addLeads(leadService, 5, LeadStatus.CONTACTED);
 
         // When
-        List<Lead> result = leadService.findByStatus(LeadStatus.QUALIFIED);
+        List<Lead> result = leadService.findByFilter(null, null, LeadStatus.QUALIFIED);
 
         // Then
         assertThat(result).hasSize(0);
@@ -173,7 +173,7 @@ class LeadServiceTest {
         addLeads(leadService, 5, LeadStatus.CONTACTED);
 
         // When
-        List<Lead> result = leadService.findByStatus(LeadStatus.NEW);
+        List<Lead> result = leadService.findByFilter(null, null, LeadStatus.NEW);
 
         // Then
         assertThat(result).hasSize(0);
@@ -189,7 +189,7 @@ class LeadServiceTest {
         addLeads(leadService, 5, LeadStatus.QUALIFIED);
 
         // When
-        List<Lead> result = leadService.findByStatus(LeadStatus.CONTACTED);
+        List<Lead> result = leadService.findByFilter(null, null, LeadStatus.CONTACTED);
 
         // Then
         assertThat(result).hasSize(0);

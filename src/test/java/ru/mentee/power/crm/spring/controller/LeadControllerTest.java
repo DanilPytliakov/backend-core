@@ -179,4 +179,103 @@ class LeadControllerTest {
                         org.hamcrest.Matchers.not(
                                 org.hamcrest.Matchers.containsString("example@company.com"))));
     }
+
+    @Test
+    void givenLeads_whenFilterByEmails_thenReturnMatchingLeads() throws Exception {
+        // Given: создаём лида
+        mockMvc.perform(post("/leads")
+                .param("email", "first@gmail.com")
+                .param("company", "ExampleCorp")
+                .param("status", "NEW"));
+        mockMvc.perform(post("/leads")
+                .param("email", "second@mail.ru")
+                .param("company", "ExampleCorp")
+                .param("status", "CONTACTED"));
+
+        // When: фильтруем по подстроке "ru"
+        mockMvc.perform(get("/leads").param("email", "ru"))
+                // Then: статус 200
+                .andExpect(status().isOk())
+                // And: лид содержащий ru в почте отображается
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("second@mail.ru")))
+                // And: лид не содержащий ru в почте не отображается
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("first@gmail.com"))));
+    }
+
+    @Test
+    void givenLeadsWithDifferentStatuses_whenFilterByNew_thenReturnOnlyNewLeads() throws Exception {
+        // Given: создаём лида
+        mockMvc.perform(post("/leads")
+                .param("email", "first@gmail.com")
+                .param("company", "ExampleCorp")
+                .param("status", "NEW"));
+        mockMvc.perform(post("/leads")
+                .param("email", "second@mail.ru")
+                .param("company", "ExampleCorp")
+                .param("status", "CONTACTED"));
+
+        // When: фильтруем по статусу NEW
+        mockMvc.perform(get("/leads").param("status", "NEW"))
+                // Then: статус 200
+                .andExpect(status().isOk())
+                // And: лид со статусом NEW отображается
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("first@gmail.com")))
+                // And: лид со статусом CONTACTED не отображается
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("second@mail.ru"))));
+    }
+
+    @Test
+    void givenLeads_whenFilterByEmailAndStatus_thenReturnMatchingLeads() throws Exception {
+        // Given: создаём лидов
+        mockMvc.perform(post("/leads")
+                .param("email", "first@gmail.com")
+                .param("company", "ExampleCorp")
+                .param("status", "NEW"));
+        mockMvc.perform(post("/leads")
+                .param("email", "second@mail.ru")
+                .param("company", "ExampleCorp")
+                .param("status", "CONTACTED"));
+        mockMvc.perform(post("/leads")
+                .param("email", "third@mail.ru")
+                .param("company", "ExampleCorp")
+                .param("status", "NEW"));
+
+        // When: фильтруем по email содержащему "test" и статусу NEW
+        mockMvc.perform(get("/leads")
+                        .param("email", "ru")
+                        .param("status", "NEW"))
+                // Then: статус 200
+                .andExpect(status().isOk())
+                // And: лид совпадающий по обоим фильтрам отображается
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("third@mail.ru")))
+                // And: лид с email "ru" но другим статусом не отображается
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("second@mail.ru"))))
+                // And: лид со статусом NEW но другим email не отображается
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("first@gmail.com"))));
+    }
+
+    @Test
+    void givenMultipleLeads_whenGetLeadsWithoutFilter_thenReturnAllLeads() throws Exception {
+        // Given: создаём лида
+        mockMvc.perform(post("/leads")
+                .param("email", "first@gmail.com")
+                .param("company", "ExampleCorp")
+                .param("status", "NEW"));
+        mockMvc.perform(post("/leads")
+                .param("email", "second@mail.ru")
+                .param("company", "ExampleCorp")
+                .param("status", "CONTACTED"));
+
+        // When: GET /leads без параметров
+        mockMvc.perform(get("/leads"))
+                // Then: статус 200
+                .andExpect(status().isOk())
+                // And: все лиды отображаются
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("first@gmail.com")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("second@mail.ru")));
+    }
 }

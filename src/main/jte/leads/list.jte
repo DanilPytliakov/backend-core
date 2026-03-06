@@ -3,7 +3,9 @@
 @import ru.mentee.power.crm.model.LeadStatus
 
 @param List<Lead> leads
-@param LeadStatus currentFilter
+@param LeadStatus currentStatus
+@param String currentEmail
+@param String currentCompany
 @param Boolean leadNotFound = false
 
 @template.layout.main(content = @`
@@ -22,36 +24,70 @@
     </script>
 @endif
 
-<div class="mb-4 flex justify-between items-center">
-    <div class="mb-4 flex gap-2">
-        <a href="/leads"
-           class="px-4 py-2 rounded ${currentFilter == null ? "bg-blue-500 text-white" : "bg-gray-200"}">
-            Все
-        </a>
-        <a href="/leads?status=NEW"
-           class="px-4 py-2 rounded ${currentFilter == LeadStatus.NEW ? "bg-blue-500 text-white" : "bg-gray-200"}">
-            NEW
-        </a>
-        <a href="/leads?status=CONTACTED"
-           class="px-4 py-2 rounded ${currentFilter == LeadStatus.CONTACTED ? "bg-blue-500 text-white" : "bg-gray-200"}">
-            CONTACTED
-        </a>
-        <a href="/leads?status=QUALIFIED"
-           class="px-4 py-2 rounded ${currentFilter == LeadStatus.QUALIFIED ? "bg-blue-500 text-white" : "bg-gray-200"}">
-            QUALIFIED
+    <div class="mb-4 flex justify-between items-center">
+        <button onclick="toggleFilter()"
+                class="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
+            🔍 Фильтр
+        </button>
+        <a href="/leads/new"
+           class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+            + Добавить лида
         </a>
     </div>
-    <a href="/leads/new"
-       class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-        + Добавить лида
-    </a>
-</div>
 
-@if(currentFilter != null)
-    <p class="text-sm text-gray-600 mb-2">
-        Показаны лиды со статусом: ${currentFilter}
-    </p>
-@endif
+    <div id="filter-panel"
+         class="${currentEmail != null || currentCompany != null || currentStatus != null ? "" : "hidden"}
+         mb-4 p-4 bg-white rounded-lg shadow-md">
+        <form method="get" action="/leads" class="flex gap-4 items-end flex-wrap">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Почта</label>
+                <input
+                        type="text"
+                        name="email"
+                        value="${currentEmail != null ? currentEmail : ""}"
+                        class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Компания</label>
+                <input
+                        type="text"
+                        name="company"
+                        value="${currentCompany != null ? currentCompany : ""}"
+                        class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Статус</label>
+                <select
+                        name="status"
+                        class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    @if(currentStatus == null)
+                        <option value="" selected>Все</option>
+                    @else
+                        <option value="">Все</option>
+                    @endif
+                    @for(var status : LeadStatus.values())
+                        @if(status == currentStatus)
+                            <option value="${status}" selected>${status}</option>
+                        @else
+                            <option value="${status}">${status}</option>
+                        @endif
+                    @endfor
+                </select>
+            </div>
+            <div class="flex gap-2">
+                <button type="submit"
+                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Применить
+                </button>
+                <a href="/leads"
+                   class="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
+                    Сбросить
+                </a>
+            </div>
+        </form>
+    </div>
 
 <div class="bg-white rounded-lg shadow-md p-6">
     <h2 class="text-2xl font-bold mb-4">Список пользователей</h2>
@@ -130,5 +166,11 @@
         document.getElementById('action-bar').classList.add('hidden');
         }
 
+</script>
+<script>
+    function toggleFilter() {
+        const panel = document.getElementById('filter-panel');
+        panel.classList.toggle('hidden');
+    }
 </script>
 `)

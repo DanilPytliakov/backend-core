@@ -21,26 +21,25 @@ public class LeadController {
 
     public LeadController(LeadService leadService) {
         this.leadService = leadService;
-        for (int i = 0; i < 5; i++) {
-            leadService.addLead("example" + i + "@gmail.com", "Company" + i, LeadStatus.NEW);
-        }
+        leadService.addLead("user1@gmail.com", "FirstCorp", LeadStatus.NEW);
+        leadService.addLead("user2@gmail.com", "FirstCorp", LeadStatus.CONTACTED);
+        leadService.addLead("user3@gmail.com", "SecondCorp", LeadStatus.QUALIFIED);
+        leadService.addLead("user4@gmail.com", "SecondCorp", LeadStatus.NEW);
+        leadService.addLead("user5@gmail.com", "ThirdCorp", LeadStatus.CONTACTED);
     }
 
     // Главная страница с лидами
     @GetMapping("/leads")
     public String showLeads(
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String company,
             @RequestParam(required = false) LeadStatus status,
             Model model
     ) {
-        List<Lead> leads;
-        if (status == null) {
-            leads = leadService.findAll();
-        } else {
-            leads = leadService.findByStatus(status);
-            model.addAttribute("currentFilter", status);
-        }
-
-        model.addAttribute("leads", leads);
+        model.addAttribute("leads", leadService.findByFilter(email, company, status));
+        model.addAttribute("currentStatus", status);
+        model.addAttribute("currentEmail", email);
+        model.addAttribute("currentCompany", company);
         model.addAttribute("leadNotFound", false);
         return "leads/list";
     }

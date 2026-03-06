@@ -17,8 +17,6 @@
         ${content}
     </main>
 
-    <footer class="bg-gray-800 text-white p-4 text-center mt-8">
-        <p>&copy; 2025 CRM Project</p>
-    </footer>
+
 </body>
 </html>
