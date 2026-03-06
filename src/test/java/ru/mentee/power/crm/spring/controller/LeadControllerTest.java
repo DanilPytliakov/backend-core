@@ -334,7 +334,6 @@ class LeadControllerTest {
                 .andExpect(content().string(
                         org.hamcrest.Matchers.containsString("Invalid email format")));
     }
-
     @Test
     void givenInvalidEmail_whenPostLeads_thenRussianErrorMessage() throws Exception {
         mockMvc.perform(post("/leads")
@@ -343,7 +342,7 @@ class LeadControllerTest {
                         .param("status", "NEW")
                         .header("Accept-Language", "ru"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(
-                        org.hamcrest.Matchers.containsString("Некорректный формат email")));
+                // проверяем код ошибки, а не текст сообщения
+                .andExpect(model().attributeHasFieldErrorCode("leadForm", "email", "Email"));
     }
 }
