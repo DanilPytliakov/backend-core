@@ -4,14 +4,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import ru.mentee.power.crm.model.CreateLeadForm;
 import ru.mentee.power.crm.model.Lead;
 import ru.mentee.power.crm.model.LeadStatus;
+import ru.mentee.power.crm.model.UpdateLeadForm;
 import ru.mentee.power.crm.service.LeadService;
 
 @Controller
@@ -21,6 +23,10 @@ public class LeadController {
 
     public LeadController(LeadService leadService) {
         this.leadService = leadService;
+    }
+
+    @PostConstruct
+    public void init() {
         leadService.addLead("user1@gmail.com", "FirstCorp", LeadStatus.NEW);
         leadService.addLead("user2@gmail.com", "FirstCorp", LeadStatus.CONTACTED);
         leadService.addLead("user3@gmail.com", "SecondCorp", LeadStatus.QUALIFIED);
@@ -47,26 +53,32 @@ public class LeadController {
     // Переадресация на страницу создания нового лида
     @GetMapping("/leads/new")
     public String showCreateForm(Model model) {
-        // Просто создаём пустую форму — данные после ошибки
-        // придут через redirect attributes или flash scope
-        model.addAttribute("lead", new Lead("", "", LeadStatus.NEW));
+        model.addAttribute("leadForm", new CreateLeadForm());
         return "leads/create";
     }
 
     @PostMapping("/leads")
     public String createLead(
-            @RequestParam String email,
-            @RequestParam String company,
-            @RequestParam LeadStatus status,
+            @Valid @ModelAttribute("leadForm") CreateLeadForm leadForm,
+            BindingResult errors,
             Model model
     ) {
-        Optional<Lead> result = leadService.addLead(email, company, status);
+        if (errors.hasErrors()) {
+            model.addAttribute("leadForm", leadForm);
+            model.addAttribute("errors", errors);
+            return "leads/create";
+        }
+
+        Optional<Lead> result = leadService.addLead(
+                leadForm.getEmail(),
+                leadForm.getCompany(),
+                leadForm.getStatus());
+
         if (result.isPresent()) {
             return "redirect:/leads";
         } else {
-            // Передаём введённые данные обратно в форму
             model.addAttribute("leadAlreadyExist", true);
-            model.addAttribute("lead", new Lead(email, company, status));
+            model.addAttribute("leadForm", leadForm);
             return "leads/create";
         }
     }
@@ -76,25 +88,39 @@ public class LeadController {
     public String showLeadUpdating(@PathVariable UUID id, Model model) {
         Optional<Lead> lead = leadService.findById(id);
         if (lead.isPresent()) {
-            model.addAttribute("lead", lead.get());
+            model.addAttribute("leadForm", new UpdateLeadForm(
+                    lead.get().id(),
+                    lead.get().email(),
+                    lead.get().company(),
+                    lead.get().status()));
             return "leads/edit";
+
         } else {
             model.addAttribute("leads", leadService.findAll());
             model.addAttribute("leadNotFound", true);
-            model.addAttribute("currentFilter", null);
+            model.addAttribute("currentStatus", null);
             return "leads/list";
         }
     }
 
     @PostMapping("/leads/{id}/edit")
     public String updateLead(
-            @PathVariable UUID id,
-            @RequestParam String email,
-            @RequestParam String company,
-            @RequestParam LeadStatus status
+            @Valid @ModelAttribute("leadForm") UpdateLeadForm leadForm,
+            BindingResult errors,
+            Model model
     ) {
-        leadService.updateLead(id, email, company, status);
-        return "redirect:/leads";
+        if (errors.hasErrors()) {
+            model.addAttribute("leadForm", leadForm);
+            model.addAttribute("errors", errors);
+            return "leads/edit";
+        }
+        else {
+            leadService.updateLead(leadForm.getId(),
+                    leadForm.getEmail(),
+                    leadForm.getCompany(),
+                    leadForm.getStatus());
+            return "redirect:/leads";
+        }
     }
 
     @PostMapping("/leads/{id}/delete")
@@ -102,4 +128,6 @@ public class LeadController {
         leadService.deleteLead(id);
         return "redirect:/leads";
     }
+
+
 }

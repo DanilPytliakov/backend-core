@@ -6,3 +6,7 @@ gg:
     template-location: src/main/jte
     development-mode: true
 
+spring:
+  messages:
+    basename: messages
+    encoding: UTF-8

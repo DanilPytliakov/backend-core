@@ -17,6 +17,8 @@ ext {
     servletVersion = '6.1.0' // Tomcat 11 / Servlet 6 актуальны для SB 4
     tomcatVersion = '11.0.1'
     jteVersion = '3.1.15'
+    validationApiVersion = '3.1.0'
+    hibernateValidatorVersion = '8.0.1.Final'
 }
 
 java {
@@ -54,6 +56,10 @@ dependencies {
     testImplementation "org.assertj:assertj-core:${assertjVersion}"
     testImplementation 'org.mockito:mockito-core:5.21.0'
     testImplementation 'org.mockito:mockito-junit-jupiter:5.21.0'
+
+    // Bean Validation
+    implementation "jakarta.validation:jakarta.validation-api:${validationApiVersion}"
+    implementation "org.hibernate.validator:hibernate-validator:${hibernateValidatorVersion}"
 }
 
 checkstyle {
