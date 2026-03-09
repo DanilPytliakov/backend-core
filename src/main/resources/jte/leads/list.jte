@@ -1,6 +1,6 @@
 @import java.util.List
-@import ru.mentee.power.crm.model.Lead
-@import ru.mentee.power.crm.model.LeadStatus
+@import ru.mentee.power.crm.domain.Lead
+@import ru.mentee.power.crm.domain.LeadStatus
 
 @param List<Lead> leads
 @param LeadStatus currentFilter

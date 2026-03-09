@@ -6,8 +6,8 @@ import java.util.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.mentee.power.crm.model.Lead;
-import ru.mentee.power.crm.model.LeadStatus;
+import ru.mentee.power.crm.domain.Lead;
+import ru.mentee.power.crm.domain.LeadStatus;
 
 class LeadRepositoryInterfaceTest {
     private LeadRepository repository;
@@ -20,7 +20,7 @@ class LeadRepositoryInterfaceTest {
     @Test
     void shouldReturnAddedLeadAndHisLength() {
         // Given
-        Lead lead = new Lead("example@gmail.com", "TechCorp", LeadStatus.NEW);
+        Lead lead = new Lead("Danil", "example@gmail.com", "TechCorp", LeadStatus.NEW);
 
         // When
         repository.save(lead);
@@ -33,7 +33,7 @@ class LeadRepositoryInterfaceTest {
     @Test
     void shouldReturnOptionalEmptyWhenTryToFindLeadByNonExistingId() {
         // Given
-        Lead lead = new Lead("example@gmail.com", "TechCorp", LeadStatus.NEW);
+        Lead lead = new Lead("Danil", "example@gmail.com", "TechCorp", LeadStatus.NEW);
 
         // When
         repository.save(lead);
@@ -45,11 +45,11 @@ class LeadRepositoryInterfaceTest {
     @Test
     void shouldtAddLeadsWithSameId() {
         // Given
-        Lead lead = new Lead("example@gmail.com", "TechCorp", LeadStatus.NEW);
+        Lead lead = new Lead("Danil", "example@gmail.com", "TechCorp", LeadStatus.NEW);
 
         // When
         repository.save(lead);
-        repository.save(new Lead(lead.id(), "example@gmail.com", "TechCorp", LeadStatus.NEW));
+        repository.save(new Lead(lead.id(), "Danil", "example@gmail.com", "TechCorp", LeadStatus.NEW));
 
         // Then
         assertThat(repository.findAll().size()).isEqualTo(1);
@@ -68,8 +68,8 @@ class LeadRepositoryInterfaceTest {
         UUID fistLeadId = UUID.randomUUID();
 
         // When
-        repository.save(new Lead(fistLeadId, "example@gmail.com", "TechCorp", LeadStatus.NEW));
-        repository.save(new Lead("example@gmail.com", "TechCorp", LeadStatus.NEW));
+        repository.save(new Lead(fistLeadId, "Danil", "example@gmail.com", "TechCorp", LeadStatus.NEW));
+        repository.save(new Lead("Danil", "example@gmail.com", "TechCorp", LeadStatus.NEW));
 
 
         // Then
@@ -86,14 +86,14 @@ class LeadRepositoryInterfaceTest {
     @Test
     void weShouldNotBeAbleToChangeInternalStorageManipulatingWithRerurnOfMethod() {
         // Given
-        repository.save(new Lead("example@gmail.com", "TechCorp", LeadStatus.NEW));
-        repository.save(new Lead("example@gmail.com", "TechCorp", LeadStatus.NEW));
+        repository.save(new Lead("Danil", "example@gmail.com", "TechCorp", LeadStatus.NEW));
+        repository.save(new Lead("Danil", "example@gmail.com", "TechCorp", LeadStatus.NEW));
 
         // When
         List<Lead> leads = repository.findAll();
 
         // Then
-        leads.add(new Lead("example@gmail.com", "TechCorp", LeadStatus.NEW));
+        leads.add(new Lead("Danil", "example@gmail.com", "TechCorp", LeadStatus.NEW));
         assertThat(leads.size()).isEqualTo(3);
         assertThat(repository.findAll().size()).isEqualTo(2);
     }

@@ -1,16 +1,20 @@
-package ru.mentee.power.crm.model;
+package ru.mentee.power.crm.domain;
 
 import java.util.Objects;
 import java.util.UUID;
 
+import ru.mentee.power.crm.dto.CreateLeadForm;
+
 public record Lead(
         UUID id,
+        String name,
         String email,
         String company,
         LeadStatus status
 ) {
-    public Lead(UUID id, String email, String company, LeadStatus status) {
+    public Lead (UUID id, String name, String email, String company, LeadStatus status) {
         this.id = Objects.requireNonNull(id, "Поле с id не должно быть null");
+        this.name = Objects.requireNonNull(name, "Поле с именем не должно быть null");
         this.email = Objects.requireNonNull(
                 email, "Поле с адресом электронной почты не должно быть null");
         this.company = Objects.requireNonNull(company, "Поле с названием компани не должно быть null");
@@ -18,8 +22,12 @@ public record Lead(
                 status, "Поле с информацией о статусе не должна быть null");
     }
 
-    public Lead(String email, String company, LeadStatus status) {
-        this(UUID.randomUUID(), email, company, status);
+    public Lead (String name, String email, String company, LeadStatus status) {
+        this(UUID.randomUUID(), name, email, company, status);
+    }
+
+    public Lead (CreateLeadForm form) {
+        this(UUID.randomUUID(), form.getName(), form.getEmail(), form.getCompany(), form.getStatus());
     }
 
     @Override

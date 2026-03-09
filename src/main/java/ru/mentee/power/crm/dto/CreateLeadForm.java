@@ -1,0 +1,26 @@
+package ru.mentee.power.crm.dto;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import ru.mentee.power.crm.domain.LeadStatus;
+
+@Data
+@NoArgsConstructor
+public class CreateLeadForm {
+
+    @NotBlank(message = "{lead.name.notblank}")
+    private String name;
+
+    @NotBlank(message = "{lead.email.notblank}")
+    @Email(message = "{lead.email.format}")
+    private String email;
+
+    @NotBlank(message = "{lead.company.notblank}")
+    private String company;
+
+    @NotNull(message = "{lead.status.notnull}")
+    private LeadStatus status;
+}

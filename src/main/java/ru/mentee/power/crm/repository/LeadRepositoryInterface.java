@@ -2,9 +2,9 @@ package ru.mentee.power.crm.repository;
 
 import java.util.*;
 
-import ru.mentee.power.crm.model.Lead;
+import ru.mentee.power.crm.domain.Lead;
 
-public interface RepositoryInterface {
+public interface LeadRepositoryInterface {
 
     Lead save(Lead lead);
 

@@ -7,8 +7,8 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.mentee.power.crm.model.Lead;
-import ru.mentee.power.crm.model.LeadStatus;
+import ru.mentee.power.crm.domain.Lead;
+import ru.mentee.power.crm.domain.LeadStatus;
 import ru.mentee.power.crm.repository.LeadRepository;
 
 class LeadServiceTest {
@@ -25,12 +25,13 @@ class LeadServiceTest {
     @Test
     void shouldCreateLead_whenEmailIsUnique() {
         // Given
+        String name = "Danil";
         String email = "test@example.com";
         String company = "Test Company";
         LeadStatus status = LeadStatus.NEW;
 
         // When
-        Lead result = service.addLead(email, company, status).get();
+        Lead result = service.addLead(name, email, company, status).get();
 
         // Then
         assertThat(result).isNotNull();
@@ -44,10 +45,10 @@ class LeadServiceTest {
     void shouldThrowNull_whenEmailAlreadyExists() {
         // Given
         String email = "duplicate@example.com";
-        service.addLead(email, "First Company", LeadStatus.NEW);
+        service.addLead("Danil", email, "First Company", LeadStatus.NEW);
 
         // When
-        Optional<Lead> lead = service.addLead(email, "Second Company", LeadStatus.NEW);
+        Optional<Lead> lead = service.addLead("Danil", email, "Second Company", LeadStatus.NEW);
 
         //Then
         assertThat(lead.isPresent()).isFalse();
@@ -56,8 +57,8 @@ class LeadServiceTest {
     @Test
     void shouldFindAllLeads() {
         // Given
-        service.addLead("one@example.com", "Company 1", LeadStatus.NEW);
-        service.addLead("two@example.com", "Company 2", LeadStatus.CONTACTED);
+        service.addLead("Danil", "one@example.com", "Company 1", LeadStatus.NEW);
+        service.addLead("Danil", "two@example.com", "Company 2", LeadStatus.CONTACTED);
 
         // When
         List<Lead> result = service.findAll();
@@ -69,7 +70,7 @@ class LeadServiceTest {
     @Test
     void shouldFindLeadById() {
         // Given
-        Lead created = service.addLead("find@example.com", "Company", LeadStatus.NEW).get();
+        Lead created = service.addLead("Danil", "find@example.com", "Company", LeadStatus.NEW).get();
 
         // When
         Optional<Lead> result = service.findById(created.id());
@@ -82,7 +83,7 @@ class LeadServiceTest {
     @Test
     void shouldFindLeadByEmail() {
         // Given
-        service.addLead("search@example.com", "Company", LeadStatus.NEW);
+        service.addLead("Danil", "search@example.com", "Company", LeadStatus.NEW);
 
         // When
         Optional<Lead> result = service.findByEmail("search@example.com");
@@ -106,14 +107,14 @@ class LeadServiceTest {
     void shouldThrowException_whenWeTryToSaveLeedWithNullElements() {
         // When/Then
         assertThatThrownBy(() ->
-                service.addLead("test@example.com", null, LeadStatus.NEW)
+                service.addLead("Danil", "test@example.com", null, LeadStatus.NEW)
         )
                 .isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("Поле с названием компани не должно быть null");
 
         // Исключение выкидывается ещё на этапе создания объекта
         assertThatThrownBy(() ->
-                new Lead("test@example.com", null, LeadStatus.NEW))
+                new Lead("Danil", "test@example.com", null, LeadStatus.NEW))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("Поле с названием компани не должно быть null");
     }
@@ -122,6 +123,7 @@ class LeadServiceTest {
     private void addLeads(LeadService service, int count, LeadStatus status) {
         for (int i = 0; i < count; i++) {
             service.addLead(
+                    "Danil",
                     "user" + status + i + "@gmail.com",
                     "Company" + i,
                     status
@@ -140,7 +142,7 @@ class LeadServiceTest {
         addLeads(leadService, 2, LeadStatus.QUALIFIED);
 
         // When
-        List<Lead> result = leadService.findByFilter(null, null, LeadStatus.NEW);
+        List<Lead> result = leadService.findByFilter(null, null, null, LeadStatus.NEW);
 
         // Then
         assertThat(result).hasSize(3);
@@ -157,7 +159,7 @@ class LeadServiceTest {
         addLeads(leadService, 5, LeadStatus.CONTACTED);
 
         // When
-        List<Lead> result = leadService.findByFilter(null, null, LeadStatus.QUALIFIED);
+        List<Lead> result = leadService.findByFilter(null, null, null, LeadStatus.QUALIFIED);
 
         // Then
         assertThat(result).hasSize(0);
@@ -173,7 +175,7 @@ class LeadServiceTest {
         addLeads(leadService, 5, LeadStatus.CONTACTED);
 
         // When
-        List<Lead> result = leadService.findByFilter(null, null, LeadStatus.NEW);
+        List<Lead> result = leadService.findByFilter(null, null, null, LeadStatus.NEW);
 
         // Then
         assertThat(result).hasSize(0);
@@ -189,7 +191,7 @@ class LeadServiceTest {
         addLeads(leadService, 5, LeadStatus.QUALIFIED);
 
         // When
-        List<Lead> result = leadService.findByFilter(null, null, LeadStatus.CONTACTED);
+        List<Lead> result = leadService.findByFilter(null, null, null, LeadStatus.CONTACTED);
 
         // Then
         assertThat(result).hasSize(0);

@@ -3,10 +3,10 @@ package ru.mentee.power.crm.repository;
 import java.util.*;
 
 import org.springframework.stereotype.Repository;
-import ru.mentee.power.crm.model.Lead;
+import ru.mentee.power.crm.domain.Lead;
 
 @Repository
-public class LeadRepository implements RepositoryInterface {
+public class LeadRepository implements LeadRepositoryInterface {
 
     private final Map<UUID, Lead> storage = new HashMap<>();
     private final Map<String, UUID> emailIndex = new HashMap<>();
