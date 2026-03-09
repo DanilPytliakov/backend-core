@@ -1,9 +1,10 @@
 @import java.util.List
-@import ru.mentee.power.crm.model.Lead
-@import ru.mentee.power.crm.model.LeadStatus
+@import ru.mentee.power.crm.domain.Lead
+@import ru.mentee.power.crm.domain.LeadStatus
 
 @param List<Lead> leads
 @param LeadStatus currentStatus
+@param String currentName
 @param String currentEmail
 @param String currentCompany
 @param Boolean leadNotFound = false
@@ -36,9 +37,18 @@
     </div>
 
     <div id="filter-panel"
-         class="${currentEmail != null || currentCompany != null || currentStatus != null ? "" : "hidden"}
+         class="${currentName!= null || currentEmail != null || currentCompany != null || currentStatus != null ? "" : "hidden"}
          mb-4 p-4 bg-white rounded-lg shadow-md">
         <form method="get" action="/leads" class="flex gap-4 items-end flex-wrap">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Имя</label>
+                <input
+                        type="text"
+                        name="name"
+                        value="${currentName != null ? currentName : ""}"
+                        class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                />
+            </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Почта</label>
                 <input
@@ -95,6 +105,7 @@
     <table class="min-w-full bg-white border border-gray-200">
         <thead class="bg-gray-100">
         <tr>
+            <th class="px-4 py-2 text-left">Имя</th>
             <th class="px-4 py-2 text-left">Почтовый адрес</th>
             <th class="px-4 py-2 text-left">Компания</th>
             <th class="px-4 py-2 text-left">Статус</th>
@@ -104,6 +115,7 @@
         @for(var lead : leads)
             <tr class="border-t hover:bg-gray-50 cursor-pointer"
                 onclick="selectRow(this, '${lead.id().toString()}')">
+                <td class="px-4 py-2">${lead.name()}</td>
                 <td class="px-4 py-2">${lead.email()}</td>
                 <td class="px-4 py-2">${lead.company()}</td>
                 <td class="px-4 py-2">
@@ -121,6 +133,11 @@
            href="#"
            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
             Редактировать
+        </a>
+        <a id="convert-btn"
+           href="#"
+           class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+            Создать сделку
         </a>
         <form id="delete-form" method="post" action="#" class="inline">
             <button type="submit"
@@ -154,6 +171,7 @@
         row.classList.add('bg-blue-100');
 
         document.getElementById('edit-btn').href = '/leads/' + id + '/edit';
+        document.getElementById('convert-btn').href = '/deals/convert/' + id;
         document.getElementById('delete-form').action = '/leads/' + id + '/delete';
         document.getElementById('action-bar').classList.remove('hidden');
         }

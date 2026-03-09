@@ -60,6 +60,12 @@ dependencies {
     // Bean Validation
     implementation "jakarta.validation:jakarta.validation-api:${validationApiVersion}"
     implementation "org.hibernate.validator:hibernate-validator:${hibernateValidatorVersion}"
+
+    // Lamboock
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
 checkstyle {

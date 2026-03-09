@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.mentee.power.crm.model.Lead;
-import ru.mentee.power.crm.model.LeadStatus;
+import ru.mentee.power.crm.domain.Lead;
+import ru.mentee.power.crm.domain.LeadStatus;
 import ru.mentee.power.crm.repository.LeadRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,7 +40,7 @@ class LeadServiceMockTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When: вызываем бизнес-метод
-        Lead result = service.addLead("new@example.com", "Company", LeadStatus.NEW).get();
+        Lead result = service.addLead("Danil", "new@example.com", "Company", LeadStatus.NEW).get();
 
         // Then: проверяем что Repository.save() был вызван ровно 1 раз
         verify(mockRepository, times(1)).save(any(Lead.class));
@@ -54,6 +54,7 @@ class LeadServiceMockTest {
         // Given: Repository возвращает существующий Lead
         Lead existingLead = new Lead(
                 UUID.randomUUID(),
+                "Danil",
                 "existing@example.com",
                 "Existing Company",
                 LeadStatus.CONTACTED
@@ -64,9 +65,10 @@ class LeadServiceMockTest {
         // When/Then: ожидаем пустой лид
         assertThat(
                 service.addLead(
-                        "existing@example.com",
-                        "New Company",
-                        LeadStatus.NEW)
+                                "Danil",
+                                "existing@example.com",
+                                "New Company",
+                                LeadStatus.NEW)
                         .isPresent())
                 .isFalse();
 
@@ -83,7 +85,7 @@ class LeadServiceMockTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        service.addLead("test@example.com", "Company", LeadStatus.NEW);
+        service.addLead("Danil", "test@example.com", "Company", LeadStatus.NEW);
 
         // Then: проверяем порядок вызовов
         var inOrder = inOrder(mockRepository);

@@ -78,6 +78,7 @@ class LeadControllerTest {
 
         // When: POST /leads
         mockMvc.perform(post("/leads")
+                        .param("name", "Danil")
                         .param("email", "test@company.com")
                         .param("company", "TestCorp")
                         .param("status", "NEW"))
@@ -90,12 +91,14 @@ class LeadControllerTest {
     void givenDuplicateEmail_whenPostLeads_thenStayOnCreatePage() throws Exception {
         // Given: лид с таким email уже существует
         mockMvc.perform(post("/leads")
+                .param("name", "Danil")
                 .param("email", "duplicate@company.com")
                 .param("company", "Corp")
                 .param("status", "NEW"));
 
         // When: POST /leads с тем же email
         mockMvc.perform(post("/leads")
+                        .param("name", "Ivan")
                         .param("email", "duplicate@company.com")
                         .param("company", "AnotherCorp")
                         .param("status", "CONTACTED"))
@@ -123,6 +126,7 @@ class LeadControllerTest {
     void givenExistingLead_whenGetLeadEdit_thenStatus200AndContainsForm() throws Exception {
         // Given: существующий лид
         mockMvc.perform(post("/leads")
+                .param("name", "Danil")
                 .param("email", "edit@company.com")
                 .param("company", "EditCorp")
                 .param("status", "NEW"));
@@ -139,6 +143,7 @@ class LeadControllerTest {
     void givenExistingLead_whenPostLeadEdit_thenRedirectToList() throws Exception {
         // Given: создаём лида
         mockMvc.perform(post("/leads")
+                .param("name", "Danil")
                 .param("email", "update@company.com")
                 .param("company", "UpdateCorp")
                 .param("status", "NEW"));
@@ -148,6 +153,7 @@ class LeadControllerTest {
 
         // When: POST /leads/{id}/edit
         mockMvc.perform(post("/leads/" + anyValidId + "/edit")
+                        .param("name", "Danil")
                         .param("email", "updated@company.com")
                         .param("company", "UpdatedCorp")
                         .param("status", "CONTACTED"))
@@ -160,6 +166,7 @@ class LeadControllerTest {
     void shouldDeleteLeadAndRedirect() throws Exception {
         // Given: создаём лида
         mockMvc.perform(post("/leads")
+                .param("name", "Danil")
                 .param("email", "example@company.com")
                 .param("company", "Corp")
                 .param("status", "NEW"));
@@ -184,10 +191,12 @@ class LeadControllerTest {
     void givenLeads_whenFilterByEmails_thenReturnMatchingLeads() throws Exception {
         // Given: создаём лида
         mockMvc.perform(post("/leads")
+                .param("name", "Danil")
                 .param("email", "first@gmail.com")
                 .param("company", "ExampleCorp")
                 .param("status", "NEW"));
         mockMvc.perform(post("/leads")
+                .param("name", "Danil")
                 .param("email", "second@mail.ru")
                 .param("company", "ExampleCorp")
                 .param("status", "CONTACTED"));
@@ -207,10 +216,12 @@ class LeadControllerTest {
     void givenLeadsWithDifferentStatuses_whenFilterByNew_thenReturnOnlyNewLeads() throws Exception {
         // Given: создаём лида
         mockMvc.perform(post("/leads")
+                .param("name", "Danil")
                 .param("email", "first@gmail.com")
                 .param("company", "ExampleCorp")
                 .param("status", "NEW"));
         mockMvc.perform(post("/leads")
+                .param("name", "Danil")
                 .param("email", "second@mail.ru")
                 .param("company", "ExampleCorp")
                 .param("status", "CONTACTED"));
@@ -230,14 +241,17 @@ class LeadControllerTest {
     void givenLeads_whenFilterByEmailAndStatus_thenReturnMatchingLeads() throws Exception {
         // Given: создаём лидов
         mockMvc.perform(post("/leads")
+                .param("name", "Danil")
                 .param("email", "first@gmail.com")
                 .param("company", "ExampleCorp")
                 .param("status", "NEW"));
         mockMvc.perform(post("/leads")
+                .param("name", "Danil")
                 .param("email", "second@mail.ru")
                 .param("company", "ExampleCorp")
                 .param("status", "CONTACTED"));
         mockMvc.perform(post("/leads")
+                .param("name", "Danil")
                 .param("email", "third@mail.ru")
                 .param("company", "ExampleCorp")
                 .param("status", "NEW"));
@@ -262,10 +276,12 @@ class LeadControllerTest {
     void givenMultipleLeads_whenGetLeadsWithoutFilter_thenReturnAllLeads() throws Exception {
         // Given: создаём лида
         mockMvc.perform(post("/leads")
+                .param("name", "Danil")
                 .param("email", "first@gmail.com")
                 .param("company", "ExampleCorp")
                 .param("status", "NEW"));
         mockMvc.perform(post("/leads")
+                .param("name", "Danil")
                 .param("email", "second@mail.ru")
                 .param("company", "ExampleCorp")
                 .param("status", "CONTACTED"));
@@ -315,6 +331,7 @@ class LeadControllerTest {
 
         // When: POST /leads с валидными данными
         mockMvc.perform(post("/leads")
+                        .param("name", "Danil")
                         .param("email", "valid@company.com")
                         .param("company", "ValidCorp")
                         .param("status", "NEW"))
@@ -334,6 +351,7 @@ class LeadControllerTest {
                 .andExpect(content().string(
                         org.hamcrest.Matchers.containsString("Invalid email format")));
     }
+
     @Test
     void givenInvalidEmail_whenPostLeads_thenRussianErrorMessage() throws Exception {
         mockMvc.perform(post("/leads")
