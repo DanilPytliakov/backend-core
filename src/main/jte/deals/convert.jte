@@ -5,7 +5,7 @@
 @template.layout.main(content = @`
     <div class="max-w-md mx-auto">
         <h1 class="text-2xl font-bold mb-6">Конвертировать лид в сделку</h1>
-        <form method="post" action="/deals/convert/${leadForm.getId().toString()}" class="space-y-4">
+        <form method="post" action="/deals/convert" class="space-y-4">
             <input type="hidden" name="leadId" value="${leadForm.getId().toString()}">
 
             <div>
