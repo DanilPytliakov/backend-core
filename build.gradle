@@ -38,7 +38,7 @@ repositories {
 dependencies {
     // Spring Boot.
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     // JTE
     implementation "gg.jte:jte:${jteVersion}"
@@ -66,6 +66,16 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
+
+    // PostgreSQL JDBC Driver (для dev и production)
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // H2 Database (только для тестов)
+    testRuntimeOnly 'com.h2database:h2:2.3.232'
+
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.assertj:assertj-core:3.24.2'
 }
 
 checkstyle {
@@ -123,7 +133,8 @@ task bootRun8081(type: org.springframework.boot.gradle.tasks.run.BootRun) {
 
     jvmArgs = [
             '--enable-preview',
-            '-Dserver.port=8081'
+            '-Dserver.port=8081',
+            '-Dspring.profiles.active=dev'
     ]
 
     args = ['--server.port=8081']
