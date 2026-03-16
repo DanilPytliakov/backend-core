@@ -17,10 +17,10 @@ public class UpdateLeadForm extends CreateLeadForm {
     private UUID id;
 
     public UpdateLeadForm(Lead lead) {
-        setName(lead.name());
-        setEmail(lead.email());
-        setCompany(lead.company());
-        setStatus(lead.status());
-        this.id = lead.id();
+        setName(lead.getName());
+        setEmail(lead.getEmail());
+        setCompany(lead.getCompany());
+        setStatus(lead.getStatus());
+        this.id = lead.getId();
     }
 }

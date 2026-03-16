@@ -2,46 +2,21 @@ package ru.mentee.power.crm.repository;
 
 import java.util.*;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.mentee.power.crm.domain.Lead;
 
 @Repository
-public class LeadRepository implements LeadRepositoryInterface {
+public interface LeadRepository extends JpaRepository<Lead, UUID> {
+    /*
+    Optional<Lead> findByEmail(String email);
+    List<Lead> findByStatus(String status);
+     */
 
-    private final Map<UUID, Lead> storage = new HashMap<>();
-    private final Map<String, UUID> emailIndex = new HashMap<>();
+    @Query(value = "SELECT * FROM leads WHERE email = ?1", nativeQuery = true)
+    Optional<Lead> findByEmail(String email);
 
-    @Override
-    public Lead save(Lead lead) {
-        storage.put(lead.id(), lead);
-        emailIndex.put(lead.email(), lead.id());
-        return lead;
-    }
-
-    @Override
-    public Optional<Lead> findById(UUID id) {
-        return Optional.ofNullable(storage.get(id));
-    }
-
-    @Override
-    public Optional<Lead> findByEmail(String email) {
-        UUID id = emailIndex.get(email);
-        if (id == null) {
-            return Optional.empty();
-        }
-        return Optional.ofNullable(storage.get(id));
-    }
-
-    @Override
-    public List<Lead> findAll() {
-        return new ArrayList<>(storage.values());
-    }
-
-    @Override
-    public void delete(UUID id) {
-        Lead lead = storage.remove(id);
-        if (lead != null) {
-            emailIndex.remove(lead.email());
-        }
-    }
+    @Query(value = "SELECT * FROM leads WHERE status = ?1", nativeQuery = true)
+    List<Lead> findByStatus(String status);
 }

@@ -114,13 +114,13 @@
         <tbody>
         @for(var lead : leads)
             <tr class="border-t hover:bg-gray-50 cursor-pointer"
-                onclick="selectRow(this, '${lead.id().toString()}')">
-                <td class="px-4 py-2">${lead.name()}</td>
-                <td class="px-4 py-2">${lead.email()}</td>
-                <td class="px-4 py-2">${lead.company()}</td>
+                onclick="selectRow(this, '${lead.getId().toString()}')">
+                <td class="px-4 py-2">${lead.getName()}</td>
+                <td class="px-4 py-2">${lead.getEmail()}</td>
+                <td class="px-4 py-2">${lead.getCompany()}</td>
                 <td class="px-4 py-2">
                             <span class="px-2 py-1 rounded text-sm bg-green-100 text-green-800">
-                                ${lead.status()}
+                                ${lead.getStatus()}
                             </span>
                 </td>
             </tr>

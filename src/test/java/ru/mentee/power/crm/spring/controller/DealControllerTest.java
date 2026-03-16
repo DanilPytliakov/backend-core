@@ -36,8 +36,7 @@ class DealControllerTest {
         return leadService.addLead(
                 "Danil",
                 UUID.randomUUID() + "@test.com",
-                "TestCorp",
-                LeadStatus.NEW
+                "TestCorp"
         ).get();
     }
 
@@ -65,7 +64,7 @@ class DealControllerTest {
     void showConvertForm_shouldReturnConvertView() throws Exception {
         Lead lead = createLead();
 
-        mockMvc.perform(get("/deals/convert/{leadId}", lead.id()))
+        mockMvc.perform(get("/deals/convert/{leadId}", lead.getId()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("deals/convert"))
                 .andExpect(model().attributeExists("leadForm"));
@@ -76,7 +75,7 @@ class DealControllerTest {
         Lead lead = createLead();
 
         mockMvc.perform(post("/deals/convert")
-                        .param("leadId", lead.id().toString())
+                        .param("leadId", lead.getId().toString())
                         .param("amount", "15000"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/deals"));
@@ -85,7 +84,7 @@ class DealControllerTest {
     @Test
     void getAvailableTransitions_shouldReturnTransitionsJson() throws Exception {
         Lead lead = createLead();
-        Deal deal = createDeal(lead.id());
+        Deal deal = createDeal(lead.getId());
 
         mockMvc.perform(get("/deals/{id}/transitions", deal.getId()))
                 .andExpect(status().isOk())
@@ -95,7 +94,7 @@ class DealControllerTest {
     @Test
     void transitionStatus_shouldRedirectToDeals() throws Exception {
         Lead lead = createLead();
-        Deal deal = createDeal(lead.id());
+        Deal deal = createDeal(lead.getId());
 
         mockMvc.perform(post("/deals/{id}/transition", deal.getId())
                         .param("newStatus", "QUALIFIED"))
@@ -106,7 +105,7 @@ class DealControllerTest {
     @Test
     void transitionStatus_toTerminalState_shouldRedirectToDeals() throws Exception {
         Lead lead = createLead();
-        Deal deal = createDeal(lead.id());
+        Deal deal = createDeal(lead.getId());
 
         mockMvc.perform(post("/deals/{id}/transition", deal.getId())
                         .param("newStatus", "LOST"))
@@ -117,7 +116,7 @@ class DealControllerTest {
     @Test
     void getAvailableTransitions_forWonDeal_shouldReturnEmptyArray() throws Exception {
         Lead lead = createLead();
-        Deal deal = createDeal(lead.id());
+        Deal deal = createDeal(lead.getId());
         dealService.transitionDealStatus(deal.getId(), DealStatus.QUALIFIED);
         dealService.transitionDealStatus(deal.getId(), DealStatus.PROPOSAL_SENT);
         dealService.transitionDealStatus(deal.getId(), DealStatus.NEGOTIATION);

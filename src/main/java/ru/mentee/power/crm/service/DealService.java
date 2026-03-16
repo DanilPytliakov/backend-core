@@ -8,14 +8,14 @@ import org.springframework.stereotype.Service;
 import ru.mentee.power.crm.domain.Deal;
 import ru.mentee.power.crm.domain.DealStatus;
 import ru.mentee.power.crm.repository.DealRepositoryInterface;
-import ru.mentee.power.crm.repository.LeadRepositoryInterface;
+import ru.mentee.power.crm.repository.LeadRepository;
 
 @Service
 public class DealService {
     private final DealRepositoryInterface dealRepository;
-    private final LeadRepositoryInterface leadRepository;
+    private final LeadRepository leadRepository;
 
-    public DealService(DealRepositoryInterface dealRepository, LeadRepositoryInterface leadRepository) {
+    public DealService(DealRepositoryInterface dealRepository, LeadRepository leadRepository) {
         this.dealRepository = dealRepository;
         this.leadRepository = leadRepository;
     }

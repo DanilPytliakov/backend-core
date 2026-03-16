@@ -40,24 +40,22 @@ class LeadServiceMockTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When: вызываем бизнес-метод
-        Lead result = service.addLead("Danil", "new@example.com", "Company", LeadStatus.NEW).get();
+        Lead result = service.addLead("Danil", "new@example.com", "Company").get();
 
         // Then: проверяем что Repository.save() был вызван ровно 1 раз
         verify(mockRepository, times(1)).save(any(Lead.class));
 
         // Then: проверяем результат
-        assertThat(result.email()).isEqualTo("new@example.com");
+        assertThat(result.getEmail()).isEqualTo("new@example.com");
     }
 
     @Test
     void shouldNotCallSave_whenEmailExists() {
         // Given: Repository возвращает существующий Lead
         Lead existingLead = new Lead(
-                UUID.randomUUID(),
                 "Danil",
                 "existing@example.com",
-                "Existing Company",
-                LeadStatus.CONTACTED
+                "Existing Company"
         );
         when(mockRepository.findByEmail("existing@example.com"))
                 .thenReturn(Optional.of(existingLead));
@@ -67,8 +65,7 @@ class LeadServiceMockTest {
                 service.addLead(
                                 "Danil",
                                 "existing@example.com",
-                                "New Company",
-                                LeadStatus.NEW)
+                                "New Company")
                         .isPresent())
                 .isFalse();
 
@@ -85,7 +82,7 @@ class LeadServiceMockTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        service.addLead("Danil", "test@example.com", "Company", LeadStatus.NEW);
+        service.addLead("Danil", "test@example.com", "Company");
 
         // Then: проверяем порядок вызовов
         var inOrder = inOrder(mockRepository);
