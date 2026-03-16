@@ -16,8 +16,8 @@ public class ConvertLeadForm {
     private LeadStatus status;
 
     public ConvertLeadForm(Lead lead) {
-        this.id = lead.id();
-        this.name = lead.name();
-        this.status = lead.status();
+        this.id = lead.getId();
+        this.name = lead.getName();
+        this.status = lead.getStatus();
     }
 }

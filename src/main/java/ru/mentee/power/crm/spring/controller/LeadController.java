@@ -1,11 +1,8 @@
 package ru.mentee.power.crm.spring.controller;
 
-import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,21 +24,6 @@ public class LeadController {
     public LeadController(LeadService leadService, DealService dealService) {
         this.leadService = leadService;
         this.dealService = dealService;
-    }
-
-    @PostConstruct
-    public void init() {
-        leadService.addLead("Иван", "user1@gmail.com", "FirstCorp", LeadStatus.NEW);
-        leadService.addLead("Максим", "user2@gmail.com", "FirstCorp", LeadStatus.CONTACTED);
-        leadService.addLead("Виктор", "user3@gmail.com", "SecondCorp", LeadStatus.QUALIFIED);
-        leadService.addLead("Мария", "user4@gmail.com", "SecondCorp", LeadStatus.NEW);
-        leadService.addLead("Татьяна", "user5@gmail.com", "ThirdCorp", LeadStatus.CONTACTED);
-
-        // Сделки — используем реальные UUID лидов
-        List<Lead> leads = leadService.findAll();
-        dealService.convertLeadToDeal(leads.get(0).id(), BigDecimal.valueOf(15000));
-        dealService.convertLeadToDeal(leads.get(1).id(), BigDecimal.valueOf(3000));
-        dealService.convertLeadToDeal(leads.get(2).id(), BigDecimal.valueOf(30000));
     }
 
     // Главная страница с лидами

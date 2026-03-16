@@ -15,38 +15,42 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.mentee.power.crm.domain.Lead;
 import ru.mentee.power.crm.domain.LeadStatus;
 import ru.mentee.power.crm.dto.CreateLeadForm;
-import ru.mentee.power.crm.repository.LeadRepositoryInterface;
+import ru.mentee.power.crm.repository.LeadRepository;
 
 @Service
 public class LeadService {
 
-    private final LeadRepositoryInterface leadRepositoryInterface;
+    private final LeadRepository leadRepository;
     private static final Logger LOG = LoggerFactory.getLogger(LeadService.class);
 
-    public LeadService(LeadRepositoryInterface repository) {
-        this.leadRepositoryInterface = repository;
+    public LeadService(LeadRepository repository) {
+        this.leadRepository = repository;
         LOG.info("LeadService constructor called");
     }
 
     public Optional<Lead> addLead(String name, String email, String company, LeadStatus status) {
-        Optional<Lead> existing = leadRepositoryInterface.findByEmail(email);
+        Optional<Lead> existing = leadRepository.findByEmail(email);
 
         if (existing.isPresent()) {
             return Optional.empty(); // явно говорим "лид не создан"
         } else {
-            Lead lead = new Lead(name, email, company, status);
-            return Optional.of(leadRepositoryInterface.save(lead));
+            Lead lead = new Lead(name, email, company,  status);
+            return Optional.of(leadRepository.save(lead));
         }
     }
 
+    public Optional<Lead> addLead(String name, String email, String company) {
+        return addLead(name, email, company, LeadStatus.NEW);
+    }
+
     public Optional<Lead> addLead(CreateLeadForm form) {
-        Optional<Lead> existing = leadRepositoryInterface.findByEmail(form.getEmail());
+        Optional<Lead> existing = leadRepository.findByEmail(form.getEmail());
 
         if (existing.isPresent()) {
             return Optional.empty(); // явно говорим "лид не создан"
         } else {
-            Lead lead = new Lead(form.getName(), form.getEmail(), form.getCompany(), form.getStatus());
-            return Optional.of(leadRepositoryInterface.save(lead));
+            Lead lead = new Lead(form.getName(), form.getEmail(), form.getCompany());
+            return Optional.of(leadRepository.save(lead));
         }
     }
 
@@ -56,45 +60,46 @@ public class LeadService {
     }
 
     public List<Lead> findAll() {
-        return new ArrayList<Lead>(leadRepositoryInterface.findAll());
+        return new ArrayList<Lead>(leadRepository.findAll());
     }
 
     public Optional<Lead> findById(UUID id) {
-        return leadRepositoryInterface.findById(id);
+        return leadRepository.findById(id);
     }
 
     public Optional<Lead> findByEmail(String email) {
-        return leadRepositoryInterface.findByEmail(email);
+        return leadRepository.findByEmail(email);
     }
 
     public List<Lead> findByFilter(String name, String email, String company, LeadStatus status) {
-        return leadRepositoryInterface.findAll().stream()
+        return leadRepository.findAll().stream()
                 .filter(lead -> name == null
                         || name.isBlank()
-                        || lead.name().toLowerCase().contains(name.toLowerCase()))
+                        || lead.getName().toLowerCase().contains(name.toLowerCase()))
                 .filter(lead -> email == null
                         || email.isBlank()
-                        || lead.email().toLowerCase().contains(email.toLowerCase()))
+                        || lead.getEmail().toLowerCase().contains(email.toLowerCase()))
                 .filter(lead -> company == null
                         || company.isBlank() 
-                        || lead.company().toLowerCase().contains(company.toLowerCase()))
-                .filter(lead -> status == null || lead.status().equals(status))
+                        || lead.getCompany().toLowerCase().contains(company.toLowerCase()))
+                .filter(lead -> status == null || lead.getStatus().equals(status))
                 .collect(Collectors.toList());
     }
 
     public void updateLead(UUID id, String name, String email, String company, LeadStatus status) {
-        Optional<Lead> existing = leadRepositoryInterface.findById(id);
-        if (existing.isPresent()) {
-            Lead updated = new Lead(id, name, email, company, status);
-            leadRepositoryInterface.save(updated);
-        }
+        Lead lead = leadRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        lead.setName(name);
+        lead.setEmail(email);
+        lead.setCompany(company);
+        lead.setStatus(status);
+        leadRepository.save(lead);
     }
 
-    public  void deleteLead(UUID id) {
-        if (leadRepositoryInterface.findById(id).isEmpty()) {
+    public void deleteLead(UUID id) {
+        if (leadRepository.findById(id).isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        leadRepositoryInterface.delete(id);
+        leadRepository.deleteById(id);
     }
-
 }

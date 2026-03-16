@@ -11,14 +11,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import ru.mentee.power.crm.service.LeadService;
 
 @SpringBootTest(properties = "gg.jte.template-location=src/main/jte")
+@Transactional
 @AutoConfigureMockMvc
 class LeadControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private LeadService leadService;
+
 
     // ───── showLeads ─────
 
@@ -148,11 +151,11 @@ class LeadControllerTest {
                 .param("company", "UpdateCorp")
                 .param("status", "NEW"));
 
-        // Используем валидный UUID (сервис обработает отсутствие лида корректно)
-        String anyValidId = "00000000-0000-0000-0000-000000000001";
+        // Получаем реальный UUID
+        UUID id = leadService.findByEmail("update@company.com").get().getId();
 
         // When: POST /leads/{id}/edit
-        mockMvc.perform(post("/leads/" + anyValidId + "/edit")
+        mockMvc.perform(post("/leads/" + id + "/edit")
                         .param("name", "Danil")
                         .param("email", "updated@company.com")
                         .param("company", "UpdatedCorp")
@@ -172,7 +175,7 @@ class LeadControllerTest {
                 .param("status", "NEW"));
 
         // Получаем UUID созданного лида
-        UUID id = leadService.findByEmail("example@company.com").get().id();
+        UUID id = leadService.findByEmail("example@company.com").get().getId();
 
         // When удаляем по реальному UUID
         mockMvc.perform(post("/leads/" + id + "/delete"))
