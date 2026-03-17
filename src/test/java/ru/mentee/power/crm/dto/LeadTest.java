@@ -1,7 +1,6 @@
 package ru.mentee.power.crm.dto;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.LOCAL_DATE;
 
 import java.time.LocalDateTime;
 import java.util.*;

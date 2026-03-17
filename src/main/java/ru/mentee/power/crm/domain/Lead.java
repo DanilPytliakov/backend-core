@@ -4,15 +4,15 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "leads")
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class Lead {
 
     @Id

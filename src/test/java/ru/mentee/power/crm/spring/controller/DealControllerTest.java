@@ -15,7 +15,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.mentee.power.crm.domain.Deal;
 import ru.mentee.power.crm.domain.DealStatus;
 import ru.mentee.power.crm.domain.Lead;
-import ru.mentee.power.crm.domain.LeadStatus;
 import ru.mentee.power.crm.service.DealService;
 import ru.mentee.power.crm.service.LeadService;
 
