@@ -4,21 +4,18 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.mentee.power.crm.domain.Deal;
 import ru.mentee.power.crm.domain.DealStatus;
-import ru.mentee.power.crm.repository.DealRepositoryInterface;
+import ru.mentee.power.crm.repository.DealRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
 
 @Service
+@RequiredArgsConstructor
 public class DealService {
-    private final DealRepositoryInterface dealRepository;
+    private final DealRepository dealRepository;
     private final LeadRepository leadRepository;
-
-    public DealService(DealRepositoryInterface dealRepository, LeadRepository leadRepository) {
-        this.dealRepository = dealRepository;
-        this.leadRepository = leadRepository;
-    }
 
     public Deal convertLeadToDeal(UUID leadId, BigDecimal amount) {
         leadRepository.findById(leadId)

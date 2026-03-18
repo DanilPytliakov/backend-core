@@ -79,4 +79,9 @@ public interface LeadRepository extends JpaRepository<Lead, UUID> {
     @Modifying
     @Query("DELETE FROM Lead l WHERE l.status = :status")
     int deleteByStatusBulk(@Param("status") LeadStatus status);
+
+    @Modifying
+    @Query("UPDATE Lead l SET l.status = :status WHERE l.id = :id")
+    void updateStatus(@Param("id") UUID id, @Param("status") LeadStatus status);
+
 }
