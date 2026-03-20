@@ -37,10 +37,22 @@ public class LeadController {
         return "redirect:/leads";  // После создания возвращаемся к списку
     }
 
+    // Главная страница с лидами
     @GetMapping("/leads")
-    public String showLeads(Model model) {
-        List<Lead> leads = leadService.findAll();
+    public String showLeads(
+            @RequestParam(required = false) LeadStatus status,
+            Model model
+    ) {
+        List<Lead> leads;
+        if (status == null) {
+            leads = leadService.findAll();
+        } else {
+            leads = leadService.findByStatus(status);
+            model.addAttribute("currentFilter", status);
+        }
+
         model.addAttribute("leads", leads);
+        model.addAttribute("leadNotFound", false);
         return "leads/list";
     }
 }
