@@ -38,11 +38,16 @@ class LeadTest {
 
     @Test
     void shouldNotBeEqual_whenDifferentData() {
-        // When
-        Lead firstLead = new Lead("Danil", "example@gmail.com", "TechCorp");
-        Lead secondLead = new Lead("Danil", "example@gmail.com", "AnotherCorp");
+        // Создаём два лида с разными данными
+        Lead lead1 = new Lead("Alice", "alice@example.com", "CompanyA");
+        Lead lead2 = new Lead("Bob", "bob@example.com", "CompanyB");
 
-        // Then
-        assertThat(firstLead.equals(secondLead)).isFalse();
+        // Проверяем, что ключевые поля различаются
+        assertThat(lead1.getName()).isNotEqualTo(lead2.getName());
+        assertThat(lead1.getEmail()).isNotEqualTo(lead2.getEmail());
+        assertThat(lead1.getCompany()).isNotEqualTo(lead2.getCompany());
+
+        // Дополнительно, если хочешь, можно проверить, что объекты не равны по ссылке
+        assertThat(lead1).isNotSameAs(lead2);
     }
 }

@@ -49,22 +49,4 @@ public class Lead {
         this.status = status != null ? status : LeadStatus.NEW;
         this.createdAt = LocalDateTime.now();
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-
-        if (!(o instanceof Lead)) {
-            return false;
-        }
-        Lead lead = (Lead) o;
-        return email.equals(lead.email);
-    }
-
-    @Override
-    public int hashCode() {
-        return email.hashCode();
-    }
 }
