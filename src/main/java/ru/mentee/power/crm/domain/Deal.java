@@ -26,7 +26,7 @@ public class Deal {
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
+    @Column(name = "stage", nullable = false, length = 50)
     private DealStatus status = DealStatus.NEW;
 
     @Column(name = "created_at", nullable = false, updatable = false)

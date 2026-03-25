@@ -28,10 +28,8 @@ class LeadTest {
         // When
         UUID id = UUID.randomUUID();
         LocalDateTime date = LocalDateTime.now();
-        Lead firstLead = new Lead(
-                id, "Danil", "example@gmail.com", "TechCorp", LeadStatus.NEW, date);
-        Lead secondLead = new Lead(
-                id, "Danil", "example@gmail.com", "TechCorp", LeadStatus.NEW, date);
+        Lead firstLead = new Lead("Danil", "example@gmail.com", "TechCorp");
+        Lead secondLead = new Lead("Danil", "example@gmail.com", "TechCorp");
 
         //Then
         assertThat(firstLead.equals(secondLead)).isTrue();

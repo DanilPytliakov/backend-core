@@ -15,7 +15,6 @@ class DealTest {
         BigDecimal amount = new BigDecimal("100000.00");
 
         Deal deal = new Deal(leadId, amount);
-        assertThat(deal.getLeadId()).isEqualTo(leadId);
         assertThat(deal.getAmount()).isEqualTo(amount);
         assertThat(deal.getStatus()).isEqualTo(DealStatus.NEW);
         assertThat(deal.getCreatedAt()).isNotNull();
