@@ -1,12 +1,11 @@
 package ru.mentee.power.crm.domain;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "leads")
@@ -35,6 +34,11 @@ public class Lead {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    @Setter(AccessLevel.NONE)
+    private Long version;
+
     public Lead(String name, String email, String company) {
         this(name, email, company, LeadStatus.NEW);
     }
@@ -45,5 +49,22 @@ public class Lead {
         this.company = company;
         this.status = status != null ? status : LeadStatus.NEW;
         this.createdAt = LocalDateTime.now();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Lead lead)) {
+            return false;
+        }
+        // email — уникальный бизнес-ключ, подходит для equals
+        return Objects.equals(email, lead.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(email);
     }
 }

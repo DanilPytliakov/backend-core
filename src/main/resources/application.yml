@@ -7,6 +7,9 @@ gg:
     development-mode: true
 
 spring:
+  liquibase:
+    enabled: false
+
   application:
     name: m-crm
 
@@ -18,4 +21,5 @@ spring:
 
 logging:
   level:
+    org.hibernate.SQL: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE

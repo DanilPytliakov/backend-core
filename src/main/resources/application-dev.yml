@@ -6,9 +6,13 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
-    defer-datasource-initialization: true
+      ddl-auto: validate
+    defer-datasource-initialization: false  # убери это при использовании Liquibase
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
 
   sql:
     init:
-      mode: always
+      mode: never  # Liquibase управляет схемой вместо schema.sql

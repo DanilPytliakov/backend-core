@@ -1,5 +1,7 @@
 package ru.mentee.power.crm.service;
 
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -7,8 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.mentee.power.crm.domain.Lead;
 import ru.mentee.power.crm.domain.LeadStatus;
 import ru.mentee.power.crm.repository.LeadRepository;
-
-import java.util.UUID;
 
 @Service
 @AllArgsConstructor
