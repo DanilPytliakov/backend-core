@@ -53,8 +53,12 @@ public class Lead {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Lead lead)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Lead lead)) {
+            return false;
+        }
         // email — уникальный бизнес-ключ, подходит для equals
         return Objects.equals(email, lead.email);
     }

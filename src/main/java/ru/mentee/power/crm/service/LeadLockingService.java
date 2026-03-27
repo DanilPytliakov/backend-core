@@ -1,5 +1,7 @@
 package ru.mentee.power.crm.service;
 
+import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,8 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.mentee.power.crm.domain.Lead;
 import ru.mentee.power.crm.domain.LeadStatus;
 import ru.mentee.power.crm.repository.LeadRepository;
-
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
