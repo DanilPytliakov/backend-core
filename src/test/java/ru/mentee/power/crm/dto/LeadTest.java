@@ -47,7 +47,6 @@ class LeadTest {
         assertThat(lead1.getEmail()).isNotEqualTo(lead2.getEmail());
         assertThat(lead1.getCompany()).isNotEqualTo(lead2.getCompany());
 
-        // Дополнительно, если хочешь, можно проверить, что объекты не равны по ссылке
         assertThat(lead1).isNotSameAs(lead2);
     }
 }
