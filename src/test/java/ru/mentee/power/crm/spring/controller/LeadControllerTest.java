@@ -404,10 +404,13 @@ class LeadControllerTest {
         // Then
         assertThat(companyService.findById(companyId)).isEmpty();
 
-        List<Lead> allLeads = leadService.findAll(); // теперь свежие данные из БД
-        assertThat(allLeads).hasSize(3);
+        // Или ищем по email которые мы создали
+        List<Lead> ourLeads = leadService.findAll().stream()
+                .filter(l -> l.getEmail().endsWith("@tinkoff.ru"))
+                .toList();
 
-        for (Lead lead : allLeads) {
+        assertThat(ourLeads).hasSize(3);
+        for (Lead lead : ourLeads) {
             assertThat(lead.getCompany()).isNull();
         }
     }
