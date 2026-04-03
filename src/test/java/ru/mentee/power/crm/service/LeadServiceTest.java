@@ -7,29 +7,32 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import ru.mentee.power.crm.domain.Company;
 import ru.mentee.power.crm.domain.Lead;
 import ru.mentee.power.crm.domain.LeadStatus;
+import ru.mentee.power.crm.repository.CompanyRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
 
 @SpringBootTest
 @Transactional
 class LeadServiceTest {
 
-    @Autowired
-    private LeadService service;
+    @Autowired private LeadService service;
+    @Autowired private LeadRepository repository;
+    @Autowired private CompanyRepository companyRepository;
+    @Autowired private LeadService leadService;
 
-    @Autowired
-    private LeadRepository repository;
+    Company firstCompany;
 
     @BeforeEach
     void setUp() {
         repository.deleteAll();
-
+        firstCompany = companyRepository.save(new Company("FirstCompany", "buisines"));
         // Создаём 3 NEW лида
         for (int i = 1; i <= 3; i++) {
             Lead lead = new Lead("Lead" + i,
                     "lead" + i + "@example.com",
-                    "Company " + i);
+                    firstCompany);
             repository.save(lead);
         }
     }

@@ -1,45 +1,51 @@
 package ru.mentee.power.crm.spring.controller;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import ru.mentee.power.crm.domain.Company;
 import ru.mentee.power.crm.domain.Lead;
 import ru.mentee.power.crm.domain.LeadStatus;
 import ru.mentee.power.crm.dto.CreateLeadForm;
 import ru.mentee.power.crm.dto.UpdateLeadForm;
-import ru.mentee.power.crm.service.DealService;
+import ru.mentee.power.crm.service.CompanyService;
 import ru.mentee.power.crm.service.LeadService;
 
 @Controller
+@AllArgsConstructor
 public class LeadController {
 
     private final LeadService leadService;
-    private final DealService dealService;
+    private final CompanyService companyService;
 
-    public LeadController(LeadService leadService, DealService dealService) {
-        this.leadService = leadService;
-        this.dealService = dealService;
+    // Автоматически добавляется в модель для всех методов этого контроллера
+    @ModelAttribute("companies") public List<Company> getAllCompanies() {
+        return companyService.findAllCompanies();
     }
 
-    // Главная страница с лидами
     @GetMapping("/leads")
     public String showLeads(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String email,
-            @RequestParam(required = false) String company,
+            @RequestParam(required = false) String companyName,
+            @RequestParam(required = false) String industry,  // было companyIndustry
             @RequestParam(required = false) LeadStatus status,
             Model model
     ) {
-        model.addAttribute("leads", leadService.findByFilter(name, email, company, status));
+        model.addAttribute("industries", companyService.findAllIndustries());
+        model.addAttribute("leads", leadService.findByFilter(name, email, companyName, industry, status));
         model.addAttribute("currentName", name);
         model.addAttribute("currentStatus", status);
         model.addAttribute("currentEmail", email);
-        model.addAttribute("currentCompany", company);
+        model.addAttribute("currentCompanyName", companyName);
+        model.addAttribute("currentCompanyIndustry", industry);
         model.addAttribute("leadNotFound", false);
         return "leads/list";
     }
@@ -63,12 +69,19 @@ public class LeadController {
             return "leads/create";
         }
 
+        UUID companyId = leadForm.getCompanyId();
+
+        Company company = null;
+
+        if (companyId != null) {
+            company = companyService.findById(companyId).get();
+        }
+
         Optional<Lead> result = leadService.addLead(
                 leadForm.getName(),
                 leadForm.getEmail(),
-                leadForm.getCompany(),
+                company,
                 leadForm.getStatus());
-
         if (result.isPresent()) {
             return "redirect:/leads";
         } else {
@@ -78,17 +91,22 @@ public class LeadController {
         }
     }
 
-    // Переадресация на страницу редактирования лида
     @GetMapping("/leads/{id}/edit")
     public String showLeadUpdating(@PathVariable UUID id, Model model) {
         Optional<Lead> lead = leadService.findById(id);
         if (lead.isPresent()) {
             model.addAttribute("leadForm", new UpdateLeadForm(lead.get()));
+            model.addAttribute("companies", companyService.findAllCompanies());
             return "leads/edit";
-
         } else {
             model.addAttribute("leads", leadService.findAll());
+            model.addAttribute("companies", companyService.findAllCompanies());
+            model.addAttribute("industries", companyService.findAllIndustries());
             model.addAttribute("leadNotFound", true);
+            model.addAttribute("currentName", null);
+            model.addAttribute("currentEmail", null);
+            model.addAttribute("currentCompanyName", null);
+            model.addAttribute("currentCompanyIndustry", null);
             model.addAttribute("currentStatus", null);
             return "leads/list";
         }
@@ -105,11 +123,17 @@ public class LeadController {
             model.addAttribute("errors", errors);
             return "leads/edit";
         } else {
+            Company company = null;
+
+            if (leadForm.getCompanyId() != null) {
+                company = companyService.findById(leadForm.getCompanyId()).get();
+            }
+
             leadService.updateLead(
                     leadForm.getId(),
                     leadForm.getName(),
                     leadForm.getEmail(),
-                    leadForm.getCompany(),
+                    company,
                     leadForm.getStatus());
             return "redirect:/leads";
         }

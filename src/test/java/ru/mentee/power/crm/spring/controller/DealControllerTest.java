@@ -12,9 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.mentee.power.crm.domain.Company;
 import ru.mentee.power.crm.domain.Deal;
 import ru.mentee.power.crm.domain.DealStatus;
 import ru.mentee.power.crm.domain.Lead;
+import ru.mentee.power.crm.repository.CompanyRepository;
+import ru.mentee.power.crm.service.CompanyService;
 import ru.mentee.power.crm.service.DealService;
 import ru.mentee.power.crm.service.LeadService;
 
@@ -22,20 +25,19 @@ import ru.mentee.power.crm.service.LeadService;
 @AutoConfigureMockMvc
 class DealControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
+    @Autowired private DealService dealService;
+    @Autowired private LeadService leadService;
+    @Autowired private CompanyRepository companyRepository;
 
-    @Autowired
-    private DealService dealService;
-
-    @Autowired
-    private LeadService leadService;
+    private Company company =  new Company();
 
     private Lead createLead() {
+        company = companyRepository.save(new Company("FirstCompany", "buisines"));
         return leadService.addLead(
                 "Danil",
                 UUID.randomUUID() + "@test.com",
-                "TestCorp"
+                company
         ).get();
     }
 

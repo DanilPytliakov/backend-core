@@ -1,26 +1,16 @@
+@import ru.mentee.power.crm.domain.Company
 @import ru.mentee.power.crm.dto.CreateLeadForm
 @import ru.mentee.power.crm.domain.LeadStatus
 @import org.springframework.validation.BindingResult
+@import java.util.List
+@import java.util.Objects
 
 @param CreateLeadForm leadForm
 @param BindingResult errors = null
 @param Boolean leadAlreadyExist = false
+@param List<Company> companies
 
 @template.layout.main(content = @`
-    @if(leadAlreadyExist)
-        <div id="alert-box"
-             class="fixed top-6 left-1/2 -translate-x-1/2 z-50
-                bg-red-500 text-white text-center
-                px-6 py-4 rounded-lg shadow-lg w-fit">
-            <p class="font-semibold">Клиент с данной почтой уже существует</p>
-        </div>
-
-        <script>
-            setTimeout(() => {
-                document.getElementById('alert-box').style.display = 'none';
-            }, 2000);
-        </script>
-    @endif
 
     <div class="max-w-md mx-auto mt-8">
         <h1 class="text-2xl font-bold mb-6">Добавить нового лида</h1>
@@ -59,18 +49,28 @@
 
             <!-- Company -->
             <div>
-                <label for="company" class="block text-sm font-medium text-gray-700 mb-1">Компания</label>
-                <input
-                        type="text"
+                <label for="Company" class="block text-sm font-medium text-gray-700 mb-1">
+                    Компания
+                </label>
+                <select
                         id="company"
-                        name="company"
-                        value="${leadForm.getCompany() != null ? leadForm.getCompany() : ""}"
-                        class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-                        placeholder="Название компании"
-                />
-                @if(errors != null && errors.hasFieldErrors("company"))
-                    <p class="text-red-600 text-sm mt-1">${errors.getFieldError("company").getDefaultMessage()}</p>
-                @endif
+                        name="companyId"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                >
+                    <option value="">Не выбрана</option>
+
+                    @for(var company : companies)
+                        @if(Objects.equals(company.getId(), leadForm.getCompanyId()))
+                            <option value="${company.getId().toString()}" selected>
+                                ${company.getName()}
+                            </option>
+                        @else
+                            <option value="${company.getId().toString()}">
+                                ${company.getName()}
+                            </option>
+                        @endif
+                    @endfor
+                </select>
             </div>
 
             <!-- Status -->

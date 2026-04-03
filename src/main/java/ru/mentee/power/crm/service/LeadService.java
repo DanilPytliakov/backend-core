@@ -1,11 +1,12 @@
 package ru.mentee.power.crm.service;
 
+import static ru.mentee.power.crm.repository.LeadSpecifications.*;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -13,16 +14,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import ru.mentee.power.crm.domain.Company;
 import ru.mentee.power.crm.domain.Deal;
 import ru.mentee.power.crm.domain.Lead;
 import ru.mentee.power.crm.domain.LeadStatus;
 import ru.mentee.power.crm.dto.CreateLeadForm;
+import ru.mentee.power.crm.repository.CompanyRepository;
 import ru.mentee.power.crm.repository.DealRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
 
@@ -33,9 +36,10 @@ public class LeadService {
     private final LeadRepository leadRepository;
     private final DealRepository dealRepository;
     private final LeadProcessor leadProcessor;
+    private final CompanyRepository companyRepository;
     private static final Logger LOG = LoggerFactory.getLogger(LeadService.class);
 
-    public Optional<Lead> addLead(String name, String email, String company, LeadStatus status) {
+    public Optional<Lead> addLead(String name, String email, Company company, LeadStatus status) {
         Optional<Lead> existing = leadRepository.findByEmail(email);
 
         if (existing.isPresent()) {
@@ -46,7 +50,7 @@ public class LeadService {
         }
     }
 
-    public Optional<Lead> addLead(String name, String email, String company) {
+    public Optional<Lead> addLead(String name, String email, Company company) {
         return addLead(name, email, company, LeadStatus.NEW);
     }
 
@@ -60,7 +64,8 @@ public class LeadService {
         if (existing.isPresent()) {
             return Optional.empty(); // явно говорим "лид не создан"
         } else {
-            Lead lead = new Lead(form.getName(), form.getEmail(), form.getCompany());
+            Lead lead = new Lead(form.getName(), form.getEmail(),
+                    companyRepository.findById(form.getCompanyId()).get());
             return Optional.of(leadRepository.save(lead));
         }
     }
@@ -78,22 +83,20 @@ public class LeadService {
         return leadRepository.findById(id);
     }
 
-    public List<Lead> findByFilter(String name, String email, String company, LeadStatus status) {
-        return leadRepository.findAll().stream()
-                .filter(lead -> name == null
-                        || name.isBlank()
-                        || lead.getName().toLowerCase().contains(name.toLowerCase()))
-                .filter(lead -> email == null
-                        || email.isBlank()
-                        || lead.getEmail().toLowerCase().contains(email.toLowerCase()))
-                .filter(lead -> company == null
-                        || company.isBlank() 
-                        || lead.getCompany().toLowerCase().contains(company.toLowerCase()))
-                .filter(lead -> status == null || lead.getStatus().equals(status))
-                .collect(Collectors.toList());
+    public List<Lead> findByFilter(String name, String email,
+                                   String companyName, String companyIndustry,
+                                   LeadStatus status) {
+
+        Specification<Lead> spec = hasName(name)
+                .and(hasEmail(email))
+                .and(hasCompanyName(companyName))
+                .and(hasCompanyIndustry(companyIndustry))
+                .and(hasStatus(status));
+
+        return leadRepository.findAll(spec);
     }
 
-    public void updateLead(UUID id, String name, String email, String company, LeadStatus status) {
+    public void updateLead(UUID id, String name, String email, Company company, LeadStatus status) {
         Lead lead = leadRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         lead.setName(name);
@@ -130,15 +133,6 @@ public class LeadService {
         return leadRepository.findAll(pageRequest);
     }
 
-    public Page<Lead> searchByCompany(String company, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return leadRepository.findByCompany(company, pageable);
-    }
-
-    /**
-     * Массовое обновление статуса (используется @Modifying метод).
-     * ВАЖНО: @Transactional обязательна для @Modifying!
-     */
     @Transactional
     public int convertNewToContacted() {
         int updated = leadRepository.updateStatusBulk(LeadStatus.NEW, LeadStatus.CONTACTED);
@@ -162,9 +156,13 @@ public class LeadService {
     }
 
     @Transactional
-    void processLeads(List<UUID> ids) {
+    public void processLeads(List<UUID> ids) {
         for (UUID id : ids) {
             leadProcessor.processSingleLead(id);
         }
+    }
+
+    public List<Lead> findByCompanyId(UUID companyId) {
+        return leadRepository.findByCompanyId(companyId);
     }
 }

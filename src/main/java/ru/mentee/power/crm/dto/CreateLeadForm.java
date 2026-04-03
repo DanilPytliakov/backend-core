@@ -1,5 +1,7 @@
 package ru.mentee.power.crm.dto;
 
+import java.util.UUID;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -18,8 +20,7 @@ public class CreateLeadForm {
     @Email(message = "{lead.email.format}")
     private String email;
 
-    @NotBlank(message = "{lead.company.notblank}")
-    private String company;
+    private UUID companyId;
 
     @NotNull(message = "{lead.status.notnull}")
     private LeadStatus status;

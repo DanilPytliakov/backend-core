@@ -6,20 +6,24 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import org.junit.jupiter.api.Test;
+import ru.mentee.power.crm.domain.Company;
 import ru.mentee.power.crm.domain.Lead;
 import ru.mentee.power.crm.domain.LeadStatus;
 
 class LeadTest {
 
+    private Company firstCompany =  new Company("Первая", "бизнес");
+    private Company secondCompany =  new Company("Вторая", "бизнес");
+
     @Test
     void shouldCreateContact_whenValidData() {
         // When
-        Lead lead = new Lead("Danil", "example@gmail.com", "TechCorp");
+        Lead lead = new Lead("Danil", "example@gmail.com", firstCompany);
 
         // Then
         assertThat(lead.getName()).isEqualTo("Danil");
         assertThat(lead.getEmail()).isEqualTo("example@gmail.com");
-        assertThat(lead.getCompany()).isEqualTo("TechCorp");
+        assertThat(lead.getCompany()).isEqualTo(firstCompany);
         assertThat(lead.getStatus()).isEqualTo(LeadStatus.NEW);
     }
 
@@ -28,8 +32,8 @@ class LeadTest {
         // When
         UUID id = UUID.randomUUID();
         LocalDateTime date = LocalDateTime.now();
-        Lead firstLead = new Lead("Danil", "example@gmail.com", "TechCorp");
-        Lead secondLead = new Lead("Danil", "example@gmail.com", "TechCorp");
+        Lead firstLead = new Lead("Danil", "example@gmail.com", firstCompany);
+        Lead secondLead = new Lead("Danil", "example@gmail.com", firstCompany);
 
         //Then
         assertThat(firstLead.equals(secondLead)).isTrue();
@@ -39,8 +43,8 @@ class LeadTest {
     @Test
     void shouldNotBeEqual_whenDifferentData() {
         // Создаём два лида с разными данными
-        Lead lead1 = new Lead("Alice", "alice@example.com", "CompanyA");
-        Lead lead2 = new Lead("Bob", "bob@example.com", "CompanyB");
+        Lead lead1 = new Lead("Alice", "alice@example.com", firstCompany);
+        Lead lead2 = new Lead("Bob", "bob@example.com", secondCompany);
 
         // Проверяем, что ключевые поля различаются
         assertThat(lead1.getName()).isNotEqualTo(lead2.getName());

@@ -6,17 +6,15 @@ import java.util.*;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import ru.mentee.power.crm.domain.Company;
 import ru.mentee.power.crm.domain.Lead;
 import ru.mentee.power.crm.domain.LeadStatus;
 
 @Repository
-public interface LeadRepository extends JpaRepository<Lead, UUID> {
+public interface LeadRepository extends JpaRepository<Lead, UUID>, JpaSpecificationExecutor<Lead> {
 
     // Обычный метод без блокировки (использует optimistic через @Version)
     Optional<Lead> findByEmail(String email);
@@ -33,8 +31,9 @@ public interface LeadRepository extends JpaRepository<Lead, UUID> {
     // Поиск лида по статусу
     List<Lead> findByStatus(LeadStatus status);
 
-    // Поиск лида по названию компании
-    List<Lead> findByCompany(String company);
+    @Modifying
+    @Query("UPDATE Lead l SET l.company = null WHERE l.company.id = :companyId")
+    void detachFromCompany(@Param("companyId") UUID companyId);
 
     // Подсчёт лидов с заданным статусом
     long countByStatus(LeadStatus status);
@@ -46,7 +45,10 @@ public interface LeadRepository extends JpaRepository<Lead, UUID> {
     List<Lead> findByEmailContaining(String emailPart);
 
     // Поиск лида по статусу и названию компании
-    List<Lead> findByStatusAndCompany(LeadStatus status, String company);
+    List<Lead> findByStatusAndCompanyName(LeadStatus status, String companyName);
+
+    // Поиск лида по статусу и компании
+    List<Lead> findByStatusAndCompany(LeadStatus status, Company company);
 
     // поиск с сортировкой по моменту создания в порядке убывания
     List<Lead> findByStatusOrderByCreatedAtDesc(LeadStatus status);
@@ -72,7 +74,7 @@ public interface LeadRepository extends JpaRepository<Lead, UUID> {
     Page<Lead> findByStatus(LeadStatus status, Pageable pageable);
 
     // Поиск по названию компании с пагинацией (derived method).
-    Page<Lead> findByCompany(String company, Pageable pageable);
+    List<Lead> findByCompanyId(UUID companyId);
 
     // JPQL запрос с пагинацией.
     @Query("SELECT l FROM Lead l WHERE l.status IN :statuses")
@@ -94,5 +96,4 @@ public interface LeadRepository extends JpaRepository<Lead, UUID> {
     @Modifying
     @Query("UPDATE Lead l SET l.status = :status WHERE l.id = :id")
     void updateStatus(@Param("id") UUID id, @Param("status") LeadStatus status);
-
 }

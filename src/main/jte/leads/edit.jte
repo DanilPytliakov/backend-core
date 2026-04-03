@@ -1,12 +1,15 @@
 @import org.springframework.validation.BindingResult
+@import ru.mentee.power.crm.domain.Company
 @import ru.mentee.power.crm.domain.Lead
 @import ru.mentee.power.crm.dto.UpdateLeadForm
 @import ru.mentee.power.crm.domain.LeadStatus
+@import java.util.List;import java.util.Objects
 @import java.util.UUID;
 
 @param UpdateLeadForm leadForm
 @param BindingResult errors = null
 @param UUID id
+@param List<Company> companies
 
 @template.layout.main(content = @`
     <div class="max-w-md mx-auto mt-8">
@@ -45,21 +48,25 @@
                 @endif
             </div>
 
+            <!-- Company -->
             <div>
                 <label for="company" class="block text-sm font-medium text-gray-700 mb-1">
                     Компания
                 </label>
-                <input
-                        type="text"
+                <select
                         id="company"
-                        name="company"
-                        value="${leadForm.getCompany() != null ? leadForm.getCompany() : ""}"
-                        class="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-                        placeholder="Название компании"
-                />
-                @if(errors != null && errors.hasFieldErrors("company"))
-                    <p class="text-red-600 text-sm mt-1">${errors.getFieldError("company").getDefaultMessage()}</p>
-                @endif
+                        name="companyId"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                >
+                    <option value="">Не выбрана</option>
+                    @for(var company : companies)
+                        @if(Objects.equals(company.getId(), leadForm.getCompanyId()))
+                            <option value="${company.getId().toString()}" selected>${company.getName()}</option>
+                        @else
+                            <option value="${company.getId().toString()}">${company.getName()}</option>
+                        @endif
+                    @endfor
+                </select>
             </div>
 
             <div>

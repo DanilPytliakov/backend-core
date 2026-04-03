@@ -6,30 +6,31 @@ import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
+import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.mentee.power.crm.domain.Company;
 import ru.mentee.power.crm.domain.Lead;
-import ru.mentee.power.crm.repository.DealRepository;
+import ru.mentee.power.crm.repository.CompanyRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
 
 @ExtendWith(MockitoExtension.class)
 class LeadServiceMockTest {
 
-    @Mock
-    private LeadRepository mockRepository;
-    @Mock
-    private DealRepository mockDealRepository;
-    @Mock
-    private LeadProcessor mockLeadProcessor;
+    @Mock private LeadRepository mockRepository;
+    @Mock private CompanyRepository companyRepository;
 
-    private LeadService service;
+    @InjectMocks private LeadService service;
+
+    private Company company;
 
     @BeforeEach
     void setUp() {
-        service = new LeadService(mockRepository, mockDealRepository, mockLeadProcessor);
+        company = new Company("FirstCompany", "business");
     }
 
     @Test
@@ -43,7 +44,7 @@ class LeadServiceMockTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When: вызываем бизнес-метод
-        Lead result = service.addLead("Danil", "new@example.com", "Company").get();
+        Lead result = service.addLead("Danil", "new@example.com", company).get();
 
         // Then: проверяем что Repository.save() был вызван ровно 1 раз
         verify(mockRepository, times(1)).save(any(Lead.class));
@@ -58,7 +59,7 @@ class LeadServiceMockTest {
         Lead existingLead = new Lead(
                 "Danil",
                 "existing@example.com",
-                "Existing Company"
+                company
         );
         when(mockRepository.findByEmail("existing@example.com"))
                 .thenReturn(Optional.of(existingLead));
@@ -68,7 +69,7 @@ class LeadServiceMockTest {
                 service.addLead(
                                 "Danil",
                                 "existing@example.com",
-                                "New Company")
+                                company)
                         .isPresent())
                 .isFalse();
 
@@ -85,7 +86,7 @@ class LeadServiceMockTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        service.addLead("Danil", "test@example.com", "Company");
+        service.addLead("Danil", "test@example.com", company);
 
         // Then: проверяем порядок вызовов
         var inOrder = inOrder(mockRepository);
