@@ -24,7 +24,9 @@ public class LeadSpecifications {
 
     public static Specification<Lead> hasCompanyName(String companyName) {
         return (root, query, cb) -> {
-            if (companyName == null || companyName.isBlank()) return null;
+            if (companyName == null || companyName.isBlank()) {
+                return null;
+            }
             // Переиспользуем существующий join если он уже есть
             Join<Lead, Company> company = getOrCreateCompanyJoin(root);
             return cb.like(cb.lower(company.get("name")),
@@ -34,7 +36,9 @@ public class LeadSpecifications {
 
     public static Specification<Lead> hasCompanyIndustry(String industry) {
         return (root, query, cb) -> {
-            if (industry == null || industry.isBlank()) return null;
+            if (industry == null || industry.isBlank()) {
+                return null;
+            }
             Join<Lead, Company> company = getOrCreateCompanyJoin(root);
             return cb.like(cb.lower(company.get("industry")),
                     "%" + industry.toLowerCase() + "%");
