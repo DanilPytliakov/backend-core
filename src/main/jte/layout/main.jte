@@ -18,6 +18,10 @@
                class="px-4 py-2 rounded-md text-white hover:bg-blue-700 transition">
                 Лиды
             </a>
+            <a href="/companies"
+               class="px-4 py-2 rounded-md text-white hover:bg-blue-700 transition">
+                Компании
+            </a>
             <a href="/deals"
                class="px-4 py-2 rounded-md text-white hover:bg-blue-700 transition">
                 Сделки

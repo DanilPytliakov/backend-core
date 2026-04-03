@@ -1,7 +1,6 @@
 package ru.mentee.power.crm.domain;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.UUID;
 
 import jakarta.persistence.*;
@@ -10,8 +9,10 @@ import lombok.*;
 @Entity
 @Table(name = "leads")
 @Data
-@AllArgsConstructor
+@ToString(exclude = "company")
+@EqualsAndHashCode(of = "email")
 @NoArgsConstructor
+@AllArgsConstructor
 public class Lead {
 
     @Id
@@ -24,8 +25,9 @@ public class Lead {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
-    private String company;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private Company company;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50, columnDefinition = "VARCHAR(50) DEFAULT 'NEW'")
@@ -39,32 +41,15 @@ public class Lead {
     @Setter(AccessLevel.NONE)
     private Long version;
 
-    public Lead(String name, String email, String company) {
+    public Lead(String name, String email, Company company) {
         this(name, email, company, LeadStatus.NEW);
     }
 
-    public Lead(String name, String email, String company, LeadStatus status) {
+    public Lead(String name, String email, Company company, LeadStatus status) {
         this.name = name;
         this.email = email;
         this.company = company;
         this.status = status != null ? status : LeadStatus.NEW;
         this.createdAt = LocalDateTime.now();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Lead lead)) {
-            return false;
-        }
-        // email — уникальный бизнес-ключ, подходит для equals
-        return Objects.equals(email, lead.email);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(email);
     }
 }

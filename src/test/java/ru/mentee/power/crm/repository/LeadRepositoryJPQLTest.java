@@ -13,25 +13,31 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
+import ru.mentee.power.crm.domain.Company;
 import ru.mentee.power.crm.domain.Lead;
 import ru.mentee.power.crm.domain.LeadStatus;
 
 @DataJpaTest
 class LeadRepositoryJPQLTest {
 
-    @Autowired
-    private LeadRepository repository;
+    @Autowired private LeadRepository repository;
+    @Autowired private CompanyRepository companyRepository;
 
     private Lead lead1;
     private Lead lead2;
+    private Company firstCompany;
+    private Company secondCompany;
 
     @BeforeEach
     void setUp() {
         // Подготовка тестовых данных
+
+        firstCompany = companyRepository.save(new Company("First Company", "IT"));
+        secondCompany = companyRepository.save(new Company("Second Company", "Finance"));
         lead1 = new Lead();
         lead1.setName("Lead 1");
         lead1.setEmail("john@example.com");
-        lead1.setCompany("ACME Corp");
+        lead1.setCompany(firstCompany);
         lead1.setStatus(LeadStatus.NEW);
         lead1.setCreatedAt(LocalDateTime.now().minusDays(5));
         repository.save(lead1);
@@ -39,7 +45,7 @@ class LeadRepositoryJPQLTest {
         lead2 = new Lead();
         lead2.setName("Lead 2");
         lead2.setEmail("jane@example.com");
-        lead2.setCompany("Tech Inc");
+        lead2.setCompany(secondCompany);
         lead2.setStatus(LeadStatus.CONTACTED);
         lead2.setCreatedAt(LocalDateTime.now().minusDays(2));
         repository.save(lead2);
@@ -52,7 +58,7 @@ class LeadRepositoryJPQLTest {
 
         // Then
         assertThat(found).isPresent();
-        assertThat(found.get().getCompany()).isEqualTo("ACME Corp");
+        assertThat(found.get().getCompany()).isEqualTo(firstCompany);
     }
 
     @Test
@@ -113,21 +119,21 @@ class LeadRepositoryJPQLTest {
         assertThat(
                 repository.findByStatusAndCompany(
                         LeadStatus.NEW,
-                        "ACME Corp")).
+                        firstCompany)).
                 hasSize(1);
 
         // Валидное название фирмы, но не статус
         assertThat(
                 repository.findByStatusAndCompany(
                         LeadStatus.QUALIFIED,
-                        "ACME Corp")).
+                        firstCompany)).
                 isEmpty();
 
         // Валидный статус, но не название фирмы
         assertThat(
                 repository.findByStatusAndCompany(
                         LeadStatus.NEW,
-                        "Invalid Corp")).
+                        secondCompany)).
                 isEmpty();
     }
 

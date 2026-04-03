@@ -16,25 +16,26 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import ru.mentee.power.crm.domain.Company;
 import ru.mentee.power.crm.domain.Lead;
 import ru.mentee.power.crm.domain.LeadStatus;
+import ru.mentee.power.crm.repository.CompanyRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
 
 @SpringBootTest
 class LeadServiceIntegrationTest {
-    @Autowired
-    private LeadRepository leadRepository;
-
-    @Autowired
-    private LeadService leadService;
-
-    @Autowired
-    private LeadProcessor leadProcessor;
+    @Autowired private LeadRepository leadRepository;
+    @Autowired private LeadService leadService;
+    @Autowired private LeadProcessor leadProcessor;
+    @Autowired private CompanyRepository companyRepository;
+    private Company company;
 
     @BeforeEach
     void setUp() {
+        company = companyRepository.save(new Company("FirstCompany", "buisines"));
         leadRepository.deleteAll();
     }
+
 
     @Test
     void convertLeadToDeal_shouldRollbackOnConstraintViolation() {
@@ -48,7 +49,7 @@ class LeadServiceIntegrationTest {
     void required_shouldJoinExistingTransaction() {
         // REQUIRED — присоединяется к существующей транзакции
         // если транзакция уже есть — использует её
-        Lead lead = leadRepository.save(new Lead("Test", "t@t.com", "Corp"));
+        Lead lead = leadRepository.save(new Lead("Test", "t@t.com", company));
         leadService.processLeads(List.of(lead.getId()));
         assertThat(leadRepository.findById(lead.getId()).get().getStatus())
                 .isEqualTo(LeadStatus.CONTACTED);
@@ -61,7 +62,7 @@ class LeadServiceIntegrationTest {
         List<UUID> ids = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             Lead saved = leadService.addLead(
-                    new Lead("Lead " + i, "lead" + i + "@test.com", "Corp")).get();
+                    new Lead("Lead " + i, "lead" + i + "@test.com", company)).get();
             ids.add(saved.getId());
         }
         ids.add(UUID.randomUUID()); // вызовет исключение
@@ -86,7 +87,7 @@ class LeadServiceIntegrationTest {
     void readCommitted_shouldNotSeeUncommittedData() {
         // READ_COMMITTED — видит только закоммиченные данные
         // предотвращает грязное чтение (dirty read)
-        Lead lead = leadRepository.save(new Lead("Test", "rc@test.com", "Corp"));
+        Lead lead = leadRepository.save(new Lead("Test", "rc@test.com", company));
         Optional<Lead> found = leadRepository.findByEmail("rc@test.com");
         assertThat(found).isPresent(); // данные закоммичены — видим их
     }
@@ -96,7 +97,7 @@ class LeadServiceIntegrationTest {
     void repeatableRead_shouldReturnSameDataOnMultipleReads() {
         // REPEATABLE_READ — повторное чтение возвращает те же данные
         // предотвращает non-repeatable read
-        Lead lead = leadRepository.save(new Lead("Test", "rr@test.com", "Corp"));
+        Lead lead = leadRepository.save(new Lead("Test", "rr@test.com", company));
 
         // первое чтение
         Lead first = leadRepository.findByEmail("rr@test.com").get();

@@ -5,31 +5,37 @@ import static org.assertj.core.api.Assertions.*;
 import java.util.UUID;
 import java.util.concurrent.*;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import ru.mentee.power.crm.domain.Company;
 import ru.mentee.power.crm.domain.Lead;
 import ru.mentee.power.crm.domain.LeadStatus;
 import ru.mentee.power.crm.dto.RetryResult;
+import ru.mentee.power.crm.repository.CompanyRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
 
 @SpringBootTest
 class LeadLockingServiceTest {
 
-    @Autowired
-    private LeadLockingService leadLockingService;
+    @Autowired private LeadLockingService leadLockingService;
+    @Autowired private LeadLockingProcessor leadLockingProcessor;
+    @Autowired private LeadRepository leadRepository;
+    @Autowired private CompanyRepository companyRepository;
 
-    @Autowired
-    private LeadLockingProcessor leadLockingProcessor;
+    private Company company;
 
-    @Autowired
-    private LeadRepository leadRepository;
+    @BeforeEach
+    void setUp() {
+        company = companyRepository.save(new Company("FirstCompany", "buisines"));
+    }
 
     @Test
     void shouldPreventLostUpdate_whenPessimisticLockUsed() throws Exception {
         // Given: Lead с начальным статусом
-        Lead lead = new Lead("Danil", "concurrent@test.com", "Company");
+        Lead lead = new Lead("Danil", "concurrent@test.com", company);
         lead = leadRepository.save(lead);
         UUID leadId = lead.getId();
 
@@ -74,7 +80,7 @@ class LeadLockingServiceTest {
     @Test
     void shouldThrowOptimisticLockException_whenConcurrentUpdateWithoutLock() throws Exception {
         // Given: Lead с optimistic locking через @Version
-        Lead lead = new Lead("Danil", "optimistic@test.com", "Company");
+        Lead lead = new Lead("Danil", "optimistic@test.com", company);
         lead = leadRepository.save(lead);
         UUID leadId = lead.getId();
 
@@ -116,7 +122,7 @@ class LeadLockingServiceTest {
 
     @Test
     void shouldRetryTransactionwhenConcurrentUpdateWithOptimisticLock() throws Exception {
-        Lead lead = new Lead("Danil", "retry@test.com", "Company");
+        Lead lead = new Lead("Danil", "retry@test.com", company);
         lead = leadRepository.save(lead);
         UUID leadId = lead.getId();
 

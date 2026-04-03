@@ -1,17 +1,23 @@
 package ru.mentee.power.crm.spring.controller;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.List;
 import java.util.UUID;
 
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import ru.mentee.power.crm.domain.Company;
+import ru.mentee.power.crm.domain.Lead;
+import ru.mentee.power.crm.service.CompanyService;
 import ru.mentee.power.crm.service.LeadService;
 
 @SpringBootTest(properties = "gg.jte.template-location=src/main/jte")
@@ -21,7 +27,8 @@ class LeadControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private LeadService leadService;
-
+    @Autowired private CompanyService companyService;
+    @Autowired private EntityManager entityManager;
 
     // ───── showLeads ─────
 
@@ -115,7 +122,7 @@ class LeadControllerTest {
     @Test
     void givenNonExistentId_whenGetLeadEdit_thenShowListWithNotFoundMessage() throws Exception {
         // Дано: несуществующий UUID
-        String nonExistentId = "00000000-0000-0000-0000-000000000000";
+        String nonExistentId = UUID.randomUUID().toString();
 
         // Когда: GET /leads/{id}/edit
         mockMvc.perform(get("/leads/" + nonExistentId + "/edit"))
@@ -299,21 +306,6 @@ class LeadControllerTest {
     }
 
     @Test
-    void givenBlankCompany_whenPostLeads_thenReturnFormWithError() throws Exception {
-        // Given: пустое название компании
-
-        // When: POST /leads с пустой компанией
-        mockMvc.perform(post("/leads")
-                        .param("email", "test@test.com")
-                        .param("company", "")
-                        .param("status", "NEW"))
-                // Then: остаёмся на странице создания
-                .andExpect(view().name("leads/create"))
-                // And: есть ошибка поля company
-                .andExpect(model().attributeHasFieldErrors("leadForm", "company"));
-    }
-
-    @Test
     void givenInvalidEmail_whenPostLeads_thenReturnFormWithEmailError() throws Exception {
         // Given: некорректный формат email
 
@@ -365,5 +357,61 @@ class LeadControllerTest {
                 .andExpect(status().isOk())
                 // проверяем код ошибки, а не текст сообщения
                 .andExpect(model().attributeHasFieldErrorCode("leadForm", "email", "Email"));
+    }
+
+    @Test
+    void shouldAvoidN1WithEntityGraph() {
+        // Given — создаём компанию с 3 лидами
+        Company company = new Company("Яндекс", "бигтех");
+        for (int i = 0; i < 3; i++) {
+            company.addLead(new Lead("lead" + i, "lead" + i + "@tinkoff.ru", company));
+        }
+
+        Company saved = companyService.save(company).get();
+
+        // When — используем метод с @EntityGraph
+        Company found = companyService.findByIdWithLeads(saved.getId()).orElseThrow();
+
+        // Then — проверяем, что leads загружены
+        assertThat(found.getLeads()).hasSize(3);
+
+        // Проверьте SQL логи: должен быть 1 запрос с LEFT JOIN,
+        // а не 1 SELECT для Company + 5 SELECT для каждого Lead
+    }
+
+    @Test
+    void shouldSetNullInsteadDeletedCompany() {
+        // Given — сначала сохраняем компанию
+        Company company = new Company("Яндекс", "бигтех");
+        Company saved = companyService.save(company).get();
+        UUID companyId = saved.getId();
+
+        // Потом создаём и сохраняем лиды отдельно
+        for (int i = 0; i < 3; i++) {
+            Lead lead = new Lead("lead" + i, "lead" + i + "@tinkoff.ru", saved);
+            leadService.addLead(lead); // ← явное сохранение каждого лида
+        }
+
+        // Проверяем начальное состояние
+        List<Lead> leadsBefore = leadService.findByCompanyId(companyId);
+        assertThat(leadsBefore).hasSize(3);
+        assertThat(leadsBefore.get(0).getCompany()).isNotNull();
+
+        // When
+        companyService.deleteCompany(companyId);
+        entityManager.clear(); // ← сбрасываем L1 кеш
+
+        // Then
+        assertThat(companyService.findById(companyId)).isEmpty();
+
+        // Или ищем по email которые мы создали
+        List<Lead> ourLeads = leadService.findAll().stream()
+                .filter(l -> l.getEmail().endsWith("@tinkoff.ru"))
+                .toList();
+
+        assertThat(ourLeads).hasSize(3);
+        for (Lead lead : ourLeads) {
+            assertThat(lead.getCompany()).isNull();
+        }
     }
 }

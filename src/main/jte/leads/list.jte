@@ -1,13 +1,18 @@
 @import java.util.List
+@import java.util.Objects
+@import ru.mentee.power.crm.domain.Company
 @import ru.mentee.power.crm.domain.Lead
 @import ru.mentee.power.crm.domain.LeadStatus
 
 @param List<Lead> leads
+@param List<String> industries
 @param LeadStatus currentStatus
 @param String currentName
 @param String currentEmail
-@param String currentCompany
+@param String currentCompanyName
+@param String currentCompanyIndustry
 @param Boolean leadNotFound = false
+@param List<Company> companies
 
 @template.layout.main(content = @`
 @if(leadNotFound)
@@ -37,7 +42,11 @@
     </div>
 
     <div id="filter-panel"
-         class="${currentName!= null || currentEmail != null || currentCompany != null || currentStatus != null ? "" : "hidden"}
+         class="${currentName!= null
+                || currentEmail != null
+                || currentCompanyName != null
+                || currentCompanyIndustry != null
+                || currentStatus != null ? "" : "hidden"}
          mb-4 p-4 bg-white rounded-lg shadow-md">
         <form method="get" action="/leads" class="flex gap-4 items-end flex-wrap">
             <div>
@@ -49,6 +58,7 @@
                         class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                 />
             </div>
+
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Почта</label>
                 <input
@@ -58,15 +68,47 @@
                         class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                 />
             </div>
+
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Компания</label>
-                <input
-                        type="text"
-                        name="company"
-                        value="${currentCompany != null ? currentCompany : ""}"
-                        class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                />
+                <select
+                        name="companyName"
+                        class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    @if(currentCompanyName == null)
+                        <option value="" selected>Все</option>
+                    @else
+                        <option value="">Все</option>
+                    @endif
+                    @for(var company : companies)
+                        @if(Objects.equals(company.getName(), currentCompanyName))
+                            <option value="${company.getName()}" selected>${company.getName()}</option>
+                        @else
+                            <option value="${company.getName()}">${company.getName()}</option>
+                        @endif
+                    @endfor
+                </select>
             </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Индустрия</label>
+                <select
+                        name="industry"
+                        class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    @if(currentCompanyIndustry == null)
+                        <option value="" selected>Все</option>
+                    @else
+                        <option value="">Все</option>
+                    @endif
+                    @for(String industry : industries)
+                        @if(Objects.equals(industry, currentCompanyIndustry))
+                            <option value="${industry}" selected>${industry}</option>
+                        @else
+                            <option value="${industry}">${industry}</option>
+                        @endif
+                    @endfor
+                </select>
+            </div>
+
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Статус</label>
                 <select
@@ -86,6 +128,7 @@
                     @endfor
                 </select>
             </div>
+
             <div class="flex gap-2">
                 <button type="submit"
                         class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
@@ -108,6 +151,7 @@
             <th class="px-4 py-2 text-left">Имя</th>
             <th class="px-4 py-2 text-left">Почтовый адрес</th>
             <th class="px-4 py-2 text-left">Компания</th>
+            <th class="px-4 py-2 text-left">Отрасль</th>
             <th class="px-4 py-2 text-left">Статус</th>
         </tr>
         </thead>
@@ -117,7 +161,20 @@
                 onclick="selectRow(this, '${lead.getId().toString()}')">
                 <td class="px-4 py-2">${lead.getName()}</td>
                 <td class="px-4 py-2">${lead.getEmail()}</td>
-                <td class="px-4 py-2">${lead.getCompany()}</td>
+                <td class="px-4 py-2">
+                    @if(lead.getCompany() != null)
+                        ${lead.getCompany().getName()}
+                    @else
+                        —
+                    @endif
+                </td>
+                <td class="px-4 py-2">
+                    @if(lead.getCompany() != null)
+                        ${lead.getCompany().getIndustry()}
+                    @else
+                        —
+                    @endif
+                </td>
                 <td class="px-4 py-2">
                             <span class="px-2 py-1 rounded text-sm bg-green-100 text-green-800">
                                 ${lead.getStatus()}

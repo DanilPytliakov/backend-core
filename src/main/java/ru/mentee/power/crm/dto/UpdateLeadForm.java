@@ -19,7 +19,7 @@ public class UpdateLeadForm extends CreateLeadForm {
     public UpdateLeadForm(Lead lead) {
         setName(lead.getName());
         setEmail(lead.getEmail());
-        setCompany(lead.getCompany());
+        setCompanyId(lead.getCompany() != null ? lead.getCompany().getId() : null);
         setStatus(lead.getStatus());
         this.id = lead.getId();
     }
