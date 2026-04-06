@@ -10,8 +10,8 @@ spring:
     defer-datasource-initialization: false
 
   liquibase:
-    change-log: classpath:db/changelog/db.changelog-master.xml
-    enabled: false
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    enabled: true
 
   sql:
     init:
