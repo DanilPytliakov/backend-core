@@ -2,6 +2,8 @@ package ru.mentee.power.crm.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -30,7 +32,10 @@ public class Deal {
     private DealStatus status = DealStatus.NEW;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<DealProduct> dealProducts = new ArrayList<>();
 
     public Deal(UUID leadId, BigDecimal amount) {
         this.leadId = Objects.requireNonNull(leadId);
@@ -45,5 +50,21 @@ public class Deal {
             throw new IllegalStateException(
                     "Невозможно сменить статус с " + status + " на " + newStatus);
         }
+    }
+
+    public void addDealProduct(DealProduct dealProduct) {
+        if (dealProduct == null) {
+            throw new IllegalArgumentException("DealProduct cannot be null");
+        }
+        dealProducts.add(dealProduct);
+        dealProduct.setDeal(this);
+    }
+
+    public void removeDealProduct(DealProduct dealProduct) {
+        if (dealProduct == null) {
+            throw new IllegalArgumentException("DealProduct cannot be null");
+        }
+        dealProducts.remove(dealProduct);
+        dealProduct.setDeal(null);
     }
 }
