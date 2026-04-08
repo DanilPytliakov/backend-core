@@ -17,51 +17,49 @@ import ru.mentee.power.crm.repository.LeadRepository;
 @Transactional
 class LeadServiceTest {
 
-    @Autowired private LeadService service;
-    @Autowired private LeadRepository repository;
-    @Autowired private CompanyRepository companyRepository;
-    @Autowired private LeadService leadService;
+  @Autowired private LeadService service;
+  @Autowired private LeadRepository repository;
+  @Autowired private CompanyRepository companyRepository;
+  @Autowired private LeadService leadService;
 
-    Company firstCompany;
+  Company firstCompany;
 
-    @BeforeEach
-    void setUp() {
-        repository.deleteAll();
-        firstCompany = companyRepository.save(new Company("FirstCompany", "buisines"));
-        // Создаём 3 NEW лида
-        for (int i = 1; i <= 3; i++) {
-            Lead lead = new Lead("Lead" + i,
-                    "lead" + i + "@example.com",
-                    firstCompany);
-            repository.save(lead);
-        }
+  @BeforeEach
+  void setUp() {
+    repository.deleteAll();
+    firstCompany = companyRepository.save(new Company("FirstCompany", "buisines"));
+    // Создаём 3 NEW лида
+    for (int i = 1; i <= 3; i++) {
+      Lead lead = new Lead("Lead" + i, "lead" + i + "@example.com", firstCompany);
+      repository.save(lead);
     }
+  }
 
-    @Test
-    void convertNewToContacted_shouldUpdateMultipleLeads() {
-        // When
-        int updated = service.convertNewToContacted();
+  @Test
+  void convertNewToContacted_shouldUpdateMultipleLeads() {
+    // When
+    int updated = service.convertNewToContacted();
 
-        // Then
-        assertThat(updated).isEqualTo(3);
+    // Then
+    assertThat(updated).isEqualTo(3);
 
-        // Проверяем что статус изменился
-        long contactedCount = repository.countByStatus(LeadStatus.CONTACTED);
-        assertThat(contactedCount).isEqualTo(3);
+    // Проверяем что статус изменился
+    long contactedCount = repository.countByStatus(LeadStatus.CONTACTED);
+    assertThat(contactedCount).isEqualTo(3);
 
-        long newCount = repository.countByStatus(LeadStatus.NEW);
-        assertThat(newCount).isEqualTo(0);
-    }
+    long newCount = repository.countByStatus(LeadStatus.NEW);
+    assertThat(newCount).isEqualTo(0);
+  }
 
-    @Test
-    void  archiveOldLeads_ShouldArchiveMultipleLeads() {
-        // When
-        assertThat(repository.countByStatus(LeadStatus.NEW)).isEqualTo(3);
+  @Test
+  void archiveOldLeads_ShouldArchiveMultipleLeads() {
+    // When
+    assertThat(repository.countByStatus(LeadStatus.NEW)).isEqualTo(3);
 
-        // Then
-        service.archiveOldLeads(LeadStatus.NEW);
+    // Then
+    service.archiveOldLeads(LeadStatus.NEW);
 
-        // Проверяем что все лиды со статусом NEW заархивированы
-        assertThat(repository.countByStatus(LeadStatus.NEW)).isZero();
-    }
+    // Проверяем что все лиды со статусом NEW заархивированы
+    assertThat(repository.countByStatus(LeadStatus.NEW)).isZero();
+  }
 }

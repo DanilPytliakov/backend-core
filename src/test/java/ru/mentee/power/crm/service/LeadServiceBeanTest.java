@@ -11,25 +11,24 @@ import ru.mentee.power.crm.service.LeadService;
 
 @SpringBootTest
 class LeadServiceBeanTest {
-    @Autowired
-    private ApplicationContext context;
+  @Autowired private ApplicationContext context;
 
-    @Test
-    void shouldCreateLeadServiceBean() {
-        LeadService service = context.getBean(LeadService.class);
-        assertThat(service).isNotNull();
-    }
+  @Test
+  void shouldCreateLeadServiceBean() {
+    LeadService service = context.getBean(LeadService.class);
+    assertThat(service).isNotNull();
+  }
 
-    @Test
-    void shouldCreateLeadRepositoryBean() {
-        LeadRepository repo = context.getBean(LeadRepository.class);
-        assertThat(repo).isNotNull();
-    }
+  @Test
+  void shouldCreateLeadRepositoryBean() {
+    LeadRepository repo = context.getBean(LeadRepository.class);
+    assertThat(repo).isNotNull();
+  }
 
-    @Test
-    void shouldInjectLeadRepositoryIntoService() {
-        LeadService service = context.getBean(LeadService.class);
-        // Проверяем что DI работает: service использует repository
-        assertThat(service.findAll()).isNotNull();
-    }
+  @Test
+  void shouldInjectLeadRepositoryIntoService() {
+    LeadService service = context.getBean(LeadService.class);
+    // Проверяем что DI работает: service использует repository
+    assertThat(service.findAll()).isNotNull();
+  }
 }

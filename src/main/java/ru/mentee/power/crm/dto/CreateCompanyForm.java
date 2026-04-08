@@ -10,12 +10,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateCompanyForm {
 
-    @NotBlank(message = "{Comapany.name.notblank}")
-    private String name;
+  @NotBlank(message = "{Comapany.name.notblank}")
+  private String name;
 
-    private String industry;
+  private String industry;
 
-    public CreateCompanyForm (String name) {
-        this.name = name;
-    }
+  public CreateCompanyForm(String name) {
+    this.name = name;
+  }
 }

@@ -2,13 +2,12 @@ package ru.mentee.power.crm.service;
 
 import static ru.mentee.power.crm.repository.LeadSpecifications.*;
 
+import jakarta.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,136 +32,143 @@ import ru.mentee.power.crm.repository.LeadRepository;
 @RequiredArgsConstructor
 public class LeadService {
 
-    private final LeadRepository leadRepository;
-    private final DealRepository dealRepository;
-    private final LeadProcessor leadProcessor;
-    private final CompanyRepository companyRepository;
-    private static final Logger LOG = LoggerFactory.getLogger(LeadService.class);
+  private final LeadRepository leadRepository;
+  private final DealRepository dealRepository;
+  private final LeadProcessor leadProcessor;
+  private final CompanyRepository companyRepository;
+  private static final Logger LOG = LoggerFactory.getLogger(LeadService.class);
 
-    public Optional<Lead> addLead(String name, String email, Company company, LeadStatus status) {
-        Optional<Lead> existing = leadRepository.findByEmail(email);
+  public Optional<Lead> addLead(String name, String email, Company company, LeadStatus status) {
+    Optional<Lead> existing = leadRepository.findByEmail(email);
 
-        if (existing.isPresent()) {
-            return Optional.empty(); // явно говорим "лид не создан"
-        } else {
-            Lead lead = new Lead(name, email, company, status);
-            return Optional.of(leadRepository.save(lead));
-        }
+    if (existing.isPresent()) {
+      return Optional.empty(); // явно говорим "лид не создан"
+    } else {
+      Lead lead = new Lead(name, email, company, status);
+      return Optional.of(leadRepository.save(lead));
     }
+  }
 
-    public Optional<Lead> addLead(String name, String email, Company company) {
-        return addLead(name, email, company, LeadStatus.NEW);
+  public Optional<Lead> addLead(String name, String email, Company company) {
+    return addLead(name, email, company, LeadStatus.NEW);
+  }
+
+  public Optional<Lead> addLead(Lead lead) {
+    return addLead(lead.getName(), lead.getEmail(), lead.getCompany(), lead.getStatus());
+  }
+
+  public Optional<Lead> addLead(CreateLeadForm form) {
+    Optional<Lead> existing = leadRepository.findByEmail(form.getEmail());
+
+    if (existing.isPresent()) {
+      return Optional.empty(); // явно говорим "лид не создан"
+    } else {
+      Lead lead =
+          new Lead(
+              form.getName(),
+              form.getEmail(),
+              companyRepository.findById(form.getCompanyId()).get());
+      return Optional.of(leadRepository.save(lead));
     }
+  }
 
-    public Optional<Lead> addLead(Lead lead) {
-        return addLead(lead.getName(), lead.getEmail(), lead.getCompany(),  lead.getStatus());
+  @PostConstruct
+  void init() {
+    LOG.info("LeadService @PostConstruct init() called - Bean lifecycle phase");
+  }
+
+  public List<Lead> findAll() {
+    return new ArrayList<Lead>(leadRepository.findAll());
+  }
+
+  public Optional<Lead> findById(UUID id) {
+    return leadRepository.findById(id);
+  }
+
+  public List<Lead> findByFilter(
+      String name, String email, String companyName, String companyIndustry, LeadStatus status) {
+
+    Specification<Lead> spec =
+        hasName(name)
+            .and(hasEmail(email))
+            .and(hasCompanyName(companyName))
+            .and(hasCompanyIndustry(companyIndustry))
+            .and(hasStatus(status));
+
+    return leadRepository.findAll(spec);
+  }
+
+  public void updateLead(UUID id, String name, String email, Company company, LeadStatus status) {
+    Lead lead =
+        leadRepository
+            .findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    lead.setName(name);
+    lead.setEmail(email);
+    lead.setCompany(company);
+    lead.setStatus(status);
+    leadRepository.save(lead);
+  }
+
+  public void deleteLead(UUID id) {
+    if (leadRepository.findById(id).isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
+    leadRepository.deleteById(id);
+  }
 
-    public Optional<Lead> addLead(CreateLeadForm form) {
-        Optional<Lead> existing = leadRepository.findByEmail(form.getEmail());
+  // Поиск лида по email (derived method).
+  public Optional<Lead> findByEmail(String email) {
+    return leadRepository.findByEmail(email);
+  }
 
-        if (existing.isPresent()) {
-            return Optional.empty(); // явно говорим "лид не создан"
-        } else {
-            Lead lead = new Lead(form.getName(), form.getEmail(),
-                    companyRepository.findById(form.getCompanyId()).get());
-            return Optional.of(leadRepository.save(lead));
-        }
+  // Поиск лидов по списку статусов (JPQL).
+  public List<Lead> findByStatuses(LeadStatus... statuses) {
+    return leadRepository.findByStatusIn(List.of(statuses));
+  }
+
+  // Получить первую страницу лидов с сортировкой.
+  public Page<Lead> getFirstPage(int pageSize) {
+    PageRequest pageRequest =
+        PageRequest.of(
+            0, // первая страница (нумерация с 0)
+            pageSize,
+            Sort.by("createdAt").descending());
+    return leadRepository.findAll(pageRequest);
+  }
+
+  @Transactional
+  public int convertNewToContacted() {
+    int updated = leadRepository.updateStatusBulk(LeadStatus.NEW, LeadStatus.CONTACTED);
+    // Логируем для observability
+    System.out.printf("Converted %d leads from NEW to CONTACTED%n", updated);
+    return updated;
+  }
+
+  @Transactional
+  public int archiveOldLeads(LeadStatus status) {
+    return leadRepository.deleteByStatusBulk(status);
+  }
+
+  @Transactional
+  public void convertLeadToDeal(UUID leadId, BigDecimal amount) {
+    Lead lead =
+        leadRepository
+            .findById(leadId)
+            .orElseThrow(() -> new IllegalStateException("Лид не найден: " + leadId));
+    dealRepository.save(new Deal(leadId, amount));
+    lead.setStatus(LeadStatus.CONTACTED);
+    leadRepository.save(lead);
+  }
+
+  @Transactional
+  public void processLeads(List<UUID> ids) {
+    for (UUID id : ids) {
+      leadProcessor.processSingleLead(id);
     }
+  }
 
-    @PostConstruct
-    void init() {
-        LOG.info("LeadService @PostConstruct init() called - Bean lifecycle phase");
-    }
-
-    public List<Lead> findAll() {
-        return new ArrayList<Lead>(leadRepository.findAll());
-    }
-
-    public Optional<Lead> findById(UUID id) {
-        return leadRepository.findById(id);
-    }
-
-    public List<Lead> findByFilter(String name, String email,
-                                   String companyName, String companyIndustry,
-                                   LeadStatus status) {
-
-        Specification<Lead> spec = hasName(name)
-                .and(hasEmail(email))
-                .and(hasCompanyName(companyName))
-                .and(hasCompanyIndustry(companyIndustry))
-                .and(hasStatus(status));
-
-        return leadRepository.findAll(spec);
-    }
-
-    public void updateLead(UUID id, String name, String email, Company company, LeadStatus status) {
-        Lead lead = leadRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        lead.setName(name);
-        lead.setEmail(email);
-        lead.setCompany(company);
-        lead.setStatus(status);
-        leadRepository.save(lead);
-    }
-
-    public void deleteLead(UUID id) {
-        if (leadRepository.findById(id).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        leadRepository.deleteById(id);
-    }
-
-    // Поиск лида по email (derived method).
-    public Optional<Lead> findByEmail(String email) {
-        return leadRepository.findByEmail(email);
-    }
-
-    // Поиск лидов по списку статусов (JPQL).
-    public List<Lead> findByStatuses(LeadStatus... statuses) {
-        return leadRepository.findByStatusIn(List.of(statuses));
-    }
-
-    // Получить первую страницу лидов с сортировкой.
-    public Page<Lead> getFirstPage(int pageSize) {
-        PageRequest pageRequest = PageRequest.of(
-                0, // первая страница (нумерация с 0)
-                pageSize,
-                Sort.by("createdAt").descending()
-        );
-        return leadRepository.findAll(pageRequest);
-    }
-
-    @Transactional
-    public int convertNewToContacted() {
-        int updated = leadRepository.updateStatusBulk(LeadStatus.NEW, LeadStatus.CONTACTED);
-        // Логируем для observability
-        System.out.printf("Converted %d leads from NEW to CONTACTED%n", updated);
-        return updated;
-    }
-
-    @Transactional
-    public int archiveOldLeads(LeadStatus status) {
-        return leadRepository.deleteByStatusBulk(status);
-    }
-
-    @Transactional
-    public void convertLeadToDeal(UUID leadId, BigDecimal amount) {
-        Lead lead = leadRepository.findById(leadId)
-                .orElseThrow(() -> new IllegalStateException("Лид не найден: " + leadId));
-        dealRepository.save(new Deal(leadId, amount));
-        lead.setStatus(LeadStatus.CONTACTED);
-        leadRepository.save(lead);
-    }
-
-    @Transactional
-    public void processLeads(List<UUID> ids) {
-        for (UUID id : ids) {
-            leadProcessor.processSingleLead(id);
-        }
-    }
-
-    public List<Lead> findByCompanyId(UUID companyId) {
-        return leadRepository.findByCompanyId(companyId);
-    }
+  public List<Lead> findByCompanyId(UUID companyId) {
+    return leadRepository.findByCompanyId(companyId);
+  }
 }
