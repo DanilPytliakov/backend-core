@@ -6,6 +6,7 @@ plugins {
     id 'gg.jte.gradle' version '3.1.15'
     id 'org.springframework.boot' version '3.5.0'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.diffplug.spotless' version '7.2.1'
 }
 
 group = 'ru.mentee.power'
@@ -125,6 +126,17 @@ jte {
     sourceDirectory = layout.projectDirectory.dir("src/main/jte").asFile.toPath()
     contentType = "Html"
     binaryStaticContent = false
+}
+
+spotless {
+    java {
+        target 'src/**/*.java'
+        targetExclude 'build/**'
+        googleJavaFormat('1.35.0')
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
 }
 
 task bootRun8081(type: org.springframework.boot.gradle.tasks.run.BootRun) {

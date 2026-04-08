@@ -3,7 +3,6 @@ package ru.mentee.power.crm.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.*;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,87 +15,85 @@ import ru.mentee.power.crm.domain.Lead;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class LeadRepositoryTest {
 
-    @Autowired private LeadRepository repository;
-    @Autowired private CompanyRepository companyRepository;
-    private Company company;
+  @Autowired private LeadRepository repository;
+  @Autowired private CompanyRepository companyRepository;
+  private Company company;
 
-    @BeforeEach
-    void setUp() {
-        company = companyRepository.save(new Company("FirstCompany", "buisines"));
-    }
+  @BeforeEach
+  void setUp() {
+    company = companyRepository.save(new Company("FirstCompany", "buisines"));
+  }
 
+  @Test
+  void shouldSaveAndFindLeadById_whenValidData() {
+    // Given
+    Lead lead = new Lead("Danil", "test@example.com", company);
 
+    // When
+    Lead saved = repository.save(lead);
+    Optional<Lead> found = repository.findById(saved.getId());
 
-    @Test
-    void shouldSaveAndFindLeadById_whenValidData() {
-        // Given
-        Lead lead = new Lead("Danil", "test@example.com", company);
+    // Then
+    assertThat(found).isPresent();
+    assertThat(found.get().getEmail()).isEqualTo("test@example.com");
+  }
 
-        // When
-        Lead saved = repository.save(lead);
-        Optional<Lead> found = repository.findById(saved.getId());
+  @Test
+  void shouldFindByEmailNative_whenLeadExists() {
+    // Given
+    Lead lead = new Lead("Danil", "test@example.com", company);
+    repository.save(lead);
 
-        // Then
-        assertThat(found).isPresent();
-        assertThat(found.get().getEmail()).isEqualTo("test@example.com");
-    }
+    // When
+    Optional<Lead> found = repository.findByEmail("test@example.com");
 
-    @Test
-    void shouldFindByEmailNative_whenLeadExists() {
-        // Given
-        Lead lead = new Lead("Danil", "test@example.com", company);
-        repository.save(lead);
+    assertThat(found).isPresent();
+    assertThat(found.get().getCompany()).isEqualTo(company);
+  }
 
-        // When
-        Optional<Lead> found = repository.findByEmail("test@example.com");
+  @Test
+  void shouldReturnEmptyOptional_whenEmailNotFound() {
+    // When
+    Optional<Lead> found = repository.findByEmail("nonexistent@test.com");
 
-        assertThat(found).isPresent();
-        assertThat(found.get().getCompany()).isEqualTo(company);
-    }
+    // Then
+    assertThat(found.isEmpty()).isTrue();
+  }
 
-    @Test
-    void shouldReturnEmptyOptional_whenEmailNotFound() {
-        // When
-        Optional<Lead> found = repository.findByEmail("nonexistent@test.com");
+  @Test
+  void shouldReturnLeadsAmount_IfTheyExist() {
+    assertThat(repository.findAll()).isEmpty();
 
-        // Then
-        assertThat(found.isEmpty()).isTrue();
-    }
+    repository.save(new Lead("Danil", "test@example.com", company));
 
-    @Test
-    void shouldReturnLeadsAmount_IfTheyExist() {
-        assertThat(repository.findAll()).isEmpty();
+    assertThat(repository.findAll()).hasSize(1);
+  }
 
-        repository.save(new Lead("Danil", "test@example.com", company));
+  @Test
+  void leadsMustBeDeletableBYid() {
+    // Given
+    Lead lead = new Lead("Danil", "test@example.com", company);
+    repository.save(lead);
+    assertThat(repository.findAll()).hasSize(1);
 
-        assertThat(repository.findAll()).hasSize(1);
-    }
+    // When
+    repository.deleteById(lead.getId());
 
-    @Test
-    void leadsMustBeDeletableBYid() {
-        // Given
-        Lead lead = new Lead("Danil", "test@example.com", company);
-        repository.save(lead);
-        assertThat(repository.findAll()).hasSize(1);
+    // Then
+    assertThat(repository.findAll()).isEmpty();
+  }
 
-        // When
-        repository.deleteById(lead.getId());
+  @Test
+  void leadsMustBeDeletable() {
+    // Given
+    Lead lead = new Lead("Danil", "test@example.com", company);
+    repository.save(lead);
+    assertThat(repository.findAll()).hasSize(1);
 
-        // Then
-        assertThat(repository.findAll()).isEmpty();
-    }
+    // When
+    repository.delete(lead);
 
-    @Test
-    void leadsMustBeDeletable() {
-        // Given
-        Lead lead = new Lead("Danil", "test@example.com", company);
-        repository.save(lead);
-        assertThat(repository.findAll()).hasSize(1);
-
-        // When
-        repository.delete(lead);
-
-        // Then
-        assertThat(repository.findAll()).isEmpty();
-    }
+    // Then
+    assertThat(repository.findAll()).isEmpty();
+  }
 }

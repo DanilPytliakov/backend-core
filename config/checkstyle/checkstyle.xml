@@ -85,12 +85,15 @@
         <!--<module name="AvoidStarImport">
             <property name="severity" value="error"/>
         </module> -->
-        <!--  WARNING: Import order  -->
-        <module name="CustomImportOrder">
+        <!--  WARNING: Import order aligned with google-java-format:
+              static imports first, then a blank line, then all other imports sorted  -->
+        <module name="ImportOrder">
             <property name="severity" value="warning"/>
-            <property name="sortImportsInGroupAlphabetically" value="true"/>
-            <property name="separateLineBetweenGroups" value="true"/>
-            <property name="customImportOrderRules" value="STATIC###STANDARD_JAVA_PACKAGE###THIRD_PARTY_PACKAGE"/>
+            <property name="option" value="top"/>
+            <property name="ordered" value="true"/>
+            <property name="separated" value="true"/>
+            <property name="sortStaticImportsAlphabetically" value="true"/>
+            <property name="useContainerOrderingForStatic" value="true"/>
         </module>
         <!--  WARNING: Unused imports  -->
         <module name="UnusedImports">
@@ -131,15 +134,16 @@
             <property name="tokens" value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_WHILE, STATIC_INIT, INSTANCE_INIT"/>
         </module>
         <!--  ==================== INDENTATION ====================  -->
-        <!--  CRITICAL: 2-space indentation (Google Style)  -->
+        <!--  CRITICAL: 2-space indentation aligned with google-java-format  -->
         <module name="Indentation">
             <property name="severity" value="error"/>
-            <property name="basicOffset" value="4"/>
+            <property name="basicOffset" value="2"/>
             <property name="braceAdjustment" value="0"/>
             <property name="caseIndent" value="2"/>
             <property name="throwsIndent" value="4"/>
             <property name="lineWrappingIndentation" value="4"/>
             <property name="arrayInitIndent" value="2"/>
+            <property name="forceStrictCondition" value="false"/>
         </module>
         <!--  ==================== WHITESPACE ====================  -->
         <!--  Whitespace around operators  -->

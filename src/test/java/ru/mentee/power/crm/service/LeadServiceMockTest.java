@@ -5,8 +5,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Optional;
-
-import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,76 +19,61 @@ import ru.mentee.power.crm.repository.LeadRepository;
 @ExtendWith(MockitoExtension.class)
 class LeadServiceMockTest {
 
-    @Mock private LeadRepository mockRepository;
-    @Mock private CompanyRepository companyRepository;
+  @Mock private LeadRepository mockRepository;
+  @Mock private CompanyRepository companyRepository;
 
-    @InjectMocks private LeadService service;
+  @InjectMocks private LeadService service;
 
-    private Company company;
+  private Company company;
 
-    @BeforeEach
-    void setUp() {
-        company = new Company("FirstCompany", "business");
-    }
+  @BeforeEach
+  void setUp() {
+    company = new Company("FirstCompany", "business");
+  }
 
-    @Test
-    void shouldCallRepositorySave_whenAddingNewLead() {
-        // Given: Repository возвращает пустой Optional (email уникален)
-        when(mockRepository.findByEmail(anyString()))
-                .thenReturn(Optional.empty());
+  @Test
+  void shouldCallRepositorySave_whenAddingNewLead() {
+    // Given: Repository возвращает пустой Optional (email уникален)
+    when(mockRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
-        // When: настраиваем save чтобы возвращал переданный Lead
-        when(mockRepository.save(any(Lead.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+    // When: настраиваем save чтобы возвращал переданный Lead
+    when(mockRepository.save(any(Lead.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // When: вызываем бизнес-метод
-        Lead result = service.addLead("Danil", "new@example.com", company).get();
+    // When: вызываем бизнес-метод
+    Lead result = service.addLead("Danil", "new@example.com", company).get();
 
-        // Then: проверяем что Repository.save() был вызван ровно 1 раз
-        verify(mockRepository, times(1)).save(any(Lead.class));
+    // Then: проверяем что Repository.save() был вызван ровно 1 раз
+    verify(mockRepository, times(1)).save(any(Lead.class));
 
-        // Then: проверяем результат
-        assertThat(result.getEmail()).isEqualTo("new@example.com");
-    }
+    // Then: проверяем результат
+    assertThat(result.getEmail()).isEqualTo("new@example.com");
+  }
 
-    @Test
-    void shouldNotCallSave_whenEmailExists() {
-        // Given: Repository возвращает существующий Lead
-        Lead existingLead = new Lead(
-                "Danil",
-                "existing@example.com",
-                company
-        );
-        when(mockRepository.findByEmail("existing@example.com"))
-                .thenReturn(Optional.of(existingLead));
+  @Test
+  void shouldNotCallSave_whenEmailExists() {
+    // Given: Repository возвращает существующий Lead
+    Lead existingLead = new Lead("Danil", "existing@example.com", company);
+    when(mockRepository.findByEmail("existing@example.com")).thenReturn(Optional.of(existingLead));
 
-        // When/Then: ожидаем пустой лид
-        assertThat(
-                service.addLead(
-                                "Danil",
-                                "existing@example.com",
-                                company)
-                        .isPresent())
-                .isFalse();
+    // When/Then: ожидаем пустой лид
+    assertThat(service.addLead("Danil", "existing@example.com", company).isPresent()).isFalse();
 
-        // Then: save() НЕ должен быть вызван
-        verify(mockRepository, never()).save(any(Lead.class));
-    }
+    // Then: save() НЕ должен быть вызван
+    verify(mockRepository, never()).save(any(Lead.class));
+  }
 
-    @Test
-    void shouldCallFindByEmail_beforeSave() {
-        // Given
-        when(mockRepository.findByEmail(anyString()))
-                .thenReturn(Optional.empty());
-        when(mockRepository.save(any(Lead.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+  @Test
+  void shouldCallFindByEmail_beforeSave() {
+    // Given
+    when(mockRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+    when(mockRepository.save(any(Lead.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // When
-        service.addLead("Danil", "test@example.com", company);
+    // When
+    service.addLead("Danil", "test@example.com", company);
 
-        // Then: проверяем порядок вызовов
-        var inOrder = inOrder(mockRepository);
-        inOrder.verify(mockRepository).findByEmail("test@example.com");
-        inOrder.verify(mockRepository).save(any(Lead.class));
-    }
+    // Then: проверяем порядок вызовов
+    var inOrder = inOrder(mockRepository);
+    inOrder.verify(mockRepository).findByEmail("test@example.com");
+    inOrder.verify(mockRepository).save(any(Lead.class));
+  }
 }
