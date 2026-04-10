@@ -1,5 +1,6 @@
 package ru.mentee.power.crm.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ import ru.mentee.power.crm.dto.CreateCompanyForm;
 @AllArgsConstructor
 @EqualsAndHashCode(of = "name")
 @ToString(exclude = "leads")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "leads"})
 @Entity
 @Table(name = "companies")
 public class Company {

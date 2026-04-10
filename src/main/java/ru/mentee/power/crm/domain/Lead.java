@@ -1,5 +1,6 @@
 package ru.mentee.power.crm.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -26,6 +27,7 @@ public class Lead {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "company_id")
+  @JsonIgnoreProperties({"leads"})
   private Company company;
 
   @Enumerated(EnumType.STRING)
