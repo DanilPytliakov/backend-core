@@ -11,16 +11,23 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import ru.mentee.power.crm.domain.Company;
 import ru.mentee.power.crm.domain.Lead;
 import ru.mentee.power.crm.repository.CompanyRepository;
+import ru.mentee.power.crm.repository.DealRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
+import ru.mentee.power.crm.spring.client.EmailValidationFeignClient;
+import ru.mentee.power.crm.spring.client.EmailValidationResponse;
 
 @ExtendWith(MockitoExtension.class)
 class LeadServiceMockTest {
 
   @Mock private LeadRepository mockRepository;
   @Mock private CompanyRepository companyRepository;
+  @Mock private DealRepository dealRepository;
+  @Mock private LeadProcessor leadProcessor;
+  @Mock private EmailValidationFeignClient emailValidationFeignClient;
 
   @InjectMocks private LeadService service;
 
@@ -29,6 +36,9 @@ class LeadServiceMockTest {
   @BeforeEach
   void setUp() {
     company = new Company("FirstCompany", "business");
+    ReflectionTestUtils.setField(service, "self", service);
+    when(emailValidationFeignClient.validateEmail(anyString()))
+        .thenReturn(new EmailValidationResponse("any@example.com", true, null));
   }
 
   @Test
