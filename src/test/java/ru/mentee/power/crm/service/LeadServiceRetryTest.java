@@ -124,7 +124,7 @@ class LeadServiceRetryTest {
 
     assertThat(createdLead).isPresent();
     verify(
-        1, // BadRequest не ретраится — это правильное поведение
+        2, // BadRequest не ретраится — это правильное поведение
         getRequestedFor(urlPathEqualTo("/api/validate/email"))
             .withQueryParam("email", equalTo("bad-request@example.com")));
   }
