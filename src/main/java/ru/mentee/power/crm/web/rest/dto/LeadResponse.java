@@ -1,0 +1,19 @@
+package ru.mentee.power.crm.web.rest.dto;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import ru.mentee.power.crm.domain.LeadStatus;
+
+@Data
+@NoArgsConstructor
+public class LeadResponse {
+
+  private UUID id;
+  private String name;
+  private String email;
+  private UUID companyId;
+  private LeadStatus status;
+  private LocalDateTime createdAt;
+}

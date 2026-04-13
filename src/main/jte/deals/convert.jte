@@ -1,5 +1,5 @@
 @import ru.mentee.power.crm.domain.Lead
-@import ru.mentee.power.crm.dto.ConvertLeadForm
+@import ru.mentee.power.crm.web.mvc.dto.ConvertLeadForm
 @param ConvertLeadForm leadForm
 
 @template.layout.main(content = @`

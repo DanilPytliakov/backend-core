@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.mentee.power.crm.domain.Company;
 import ru.mentee.power.crm.domain.Lead;
-import ru.mentee.power.crm.dto.CreateCompanyForm;
+import ru.mentee.power.crm.web.mvc.dto.CreateCompanyForm;
 
 @SpringBootTest
 @Transactional

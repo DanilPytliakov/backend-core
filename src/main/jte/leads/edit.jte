@@ -1,7 +1,7 @@
 @import org.springframework.validation.BindingResult
 @import ru.mentee.power.crm.domain.Company
 @import ru.mentee.power.crm.domain.Lead
-@import ru.mentee.power.crm.dto.UpdateLeadForm
+@import ru.mentee.power.crm.web.mvc.dto.UpdateLeadForm
 @import ru.mentee.power.crm.domain.LeadStatus
 @import java.util.List;import java.util.Objects
 @import java.util.UUID;

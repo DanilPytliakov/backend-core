@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.*;
-import ru.mentee.power.crm.dto.CreateCompanyForm;
+import ru.mentee.power.crm.web.mvc.dto.CreateCompanyForm;
 
 @Data
 @NoArgsConstructor
