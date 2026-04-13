@@ -8,9 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.mentee.power.crm.domain.Company;
-import ru.mentee.power.crm.dto.CreateCompanyForm;
 import ru.mentee.power.crm.repository.CompanyRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
+import ru.mentee.power.crm.web.mvc.dto.CreateCompanyForm;
 
 @Service
 @RequiredArgsConstructor

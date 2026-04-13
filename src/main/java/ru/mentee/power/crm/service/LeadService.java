@@ -24,13 +24,13 @@ import ru.mentee.power.crm.domain.Company;
 import ru.mentee.power.crm.domain.Deal;
 import ru.mentee.power.crm.domain.Lead;
 import ru.mentee.power.crm.domain.LeadStatus;
-import ru.mentee.power.crm.dto.CreateLeadForm;
-import ru.mentee.power.crm.dto.UpdateLeadForm;
 import ru.mentee.power.crm.repository.CompanyRepository;
 import ru.mentee.power.crm.repository.DealRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
 import ru.mentee.power.crm.spring.client.EmailValidationFeignClient;
 import ru.mentee.power.crm.spring.client.EmailValidationResponse;
+import ru.mentee.power.crm.web.mvc.dto.CreateLeadForm;
+import ru.mentee.power.crm.web.mvc.dto.UpdateLeadForm;
 
 @Service
 @RequiredArgsConstructor

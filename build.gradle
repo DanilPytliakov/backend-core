@@ -15,6 +15,8 @@ version = '1.0-SNAPSHOT'
 ext {
     junitVersion = '5.10.0' // или новее
     assertjVersion = '3.25.3'
+    mapstructVersion = '1.6.3'
+    lombokMapstructBindingVersion = '0.2.0'
     servletVersion = '6.1.0' // Tomcat 11 / Servlet 6 актуальны для SB 4
     tomcatVersion = '11.0.1'
     jteVersion = '3.1.15'
@@ -79,6 +81,9 @@ dependencies {
     // Lamboock
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    implementation "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
 
@@ -97,6 +102,13 @@ dependencies {
 
     // WireMock для интеграционных тестов внешних API
     testImplementation 'org.wiremock:wiremock-standalone:3.4.2'
+}
+
+tasks.named('compileJava', JavaCompile) {
+    options.compilerArgs += [
+            '-Amapstruct.defaultComponentModel=spring',
+            '-Amapstruct.unmappedTargetPolicy=ERROR'
+    ]
 }
 
 checkstyle {

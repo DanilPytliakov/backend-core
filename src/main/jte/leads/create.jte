@@ -1,5 +1,5 @@
 @import ru.mentee.power.crm.domain.Company
-@import ru.mentee.power.crm.dto.CreateLeadForm
+@import ru.mentee.power.crm.web.mvc.dto.CreateLeadForm
 @import ru.mentee.power.crm.domain.LeadStatus
 @import org.springframework.validation.BindingResult
 @import java.util.List
