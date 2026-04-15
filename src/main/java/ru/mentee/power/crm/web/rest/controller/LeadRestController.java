@@ -1,10 +1,13 @@
 package ru.mentee.power.crm.web.rest.controller;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.mentee.power.crm.domain.Company;
 import ru.mentee.power.crm.domain.Lead;
@@ -18,6 +21,7 @@ import ru.mentee.power.crm.web.rest.mapper.LeadMapper;
 @RestController
 @RequestMapping("/api/leads")
 @RequiredArgsConstructor
+@Validated
 public class LeadRestController {
 
   private final LeadService leadService;
@@ -37,7 +41,8 @@ public class LeadRestController {
   // 200 OK + JSON лида, если найден.
   // 404 Not Found, если лида с таким id нет.
   @GetMapping("/{id}")
-  public ResponseEntity<LeadResponse> getLeadById(@PathVariable UUID id) {
+  public ResponseEntity<LeadResponse> getLeadById(
+      @PathVariable @NotNull(message = "ID лида обязателен") UUID id) {
     return leadService
         .findById(id)
         .map(leadMapper::toResponse)
@@ -49,7 +54,7 @@ public class LeadRestController {
   // 201 Created + Location: /api/leads/{id} + JSON созданного лида при успехе.
   // 409 Conflict, если создать нельзя (например, лид с таким email уже существует).
   @PostMapping
-  public ResponseEntity<LeadResponse> createLead(@RequestBody CreateLeadRequest request) {
+  public ResponseEntity<LeadResponse> createLead(@Valid @RequestBody CreateLeadRequest request) {
     Lead lead = leadMapper.toEntity(request);
     Company company =
         request.getCompanyId() != null
