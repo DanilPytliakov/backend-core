@@ -24,6 +24,7 @@ import ru.mentee.power.crm.domain.Company;
 import ru.mentee.power.crm.domain.Deal;
 import ru.mentee.power.crm.domain.Lead;
 import ru.mentee.power.crm.domain.LeadStatus;
+import ru.mentee.power.crm.exception.EntityNotFoundException;
 import ru.mentee.power.crm.repository.CompanyRepository;
 import ru.mentee.power.crm.repository.DealRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
@@ -116,6 +117,12 @@ public class LeadService {
     return leadRepository.findById(id);
   }
 
+  public Lead getLeadOrThrow(UUID id) {
+    return leadRepository
+        .findById(id)
+        .orElseThrow(() -> new EntityNotFoundException("Lead", id.toString()));
+  }
+
   public List<Lead> findByFilter(
       String name, String email, String companyName, String companyIndustry, LeadStatus status) {
 
@@ -157,6 +164,24 @@ public class LeadService {
             });
   }
 
+  public Lead updateLeadOrThrow(Lead lead) {
+    UUID id = Optional.ofNullable(lead).map(Lead::getId).orElse(null);
+    if (id == null) {
+      throw new EntityNotFoundException("Lead", "null");
+    }
+
+    Lead existingLead =
+        leadRepository
+            .findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Lead", id.toString()));
+
+    existingLead.setName(lead.getName());
+    existingLead.setEmail(lead.getEmail());
+    existingLead.setCompany(lead.getCompany());
+    existingLead.setStatus(lead.getStatus());
+    return leadRepository.save(existingLead);
+  }
+
   public Optional<Lead> updateLead(UpdateLeadForm form) {
     if (form == null) {
       return Optional.empty();
@@ -175,6 +200,13 @@ public class LeadService {
     }
     leadRepository.deleteById(id);
     return true;
+  }
+
+  public void deleteLeadOrThrow(UUID id) {
+    if (!leadRepository.existsById(id)) {
+      throw new EntityNotFoundException("Lead", id.toString());
+    }
+    leadRepository.deleteById(id);
   }
 
   // Поиск лида по email (derived method).
@@ -215,7 +247,7 @@ public class LeadService {
     Lead lead =
         leadRepository
             .findById(leadId)
-            .orElseThrow(() -> new IllegalStateException("Лид не найден: " + leadId));
+            .orElseThrow(() -> new EntityNotFoundException("Lead", leadId.toString()));
     dealRepository.save(new Deal(leadId, amount));
     lead.setStatus(LeadStatus.CONTACTED);
     leadRepository.save(lead);
