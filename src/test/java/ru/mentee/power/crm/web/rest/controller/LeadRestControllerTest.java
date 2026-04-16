@@ -23,7 +23,7 @@ import ru.mentee.power.crm.domain.LeadStatus;
 import ru.mentee.power.crm.exception.EntityNotFoundException;
 import ru.mentee.power.crm.service.CompanyService;
 import ru.mentee.power.crm.service.LeadService;
-import ru.mentee.power.crm.web.rest.dto.LeadResponse;
+import ru.mentee.power.crm.spring.dto.generated.LeadResponse;
 import ru.mentee.power.crm.web.rest.mapper.LeadMapper;
 
 @WebMvcTest(LeadRestController.class)
@@ -41,7 +41,7 @@ class LeadRestControllerTest {
     LeadResponse response = new LeadResponse();
     response.setName("Alice");
     response.setEmail("alice@example.com");
-    response.setStatus(LeadStatus.NEW);
+    response.setStatus(ru.mentee.power.crm.spring.dto.generated.LeadStatus.NEW);
     when(leadService.findAll()).thenReturn(List.of(lead));
     when(leadMapper.toResponse(any(Lead.class))).thenReturn(response);
 
@@ -69,7 +69,7 @@ class LeadRestControllerTest {
     response.setId(id);
     response.setName("Alice");
     response.setEmail("alice@example.com");
-    response.setStatus(LeadStatus.NEW);
+    response.setStatus(ru.mentee.power.crm.spring.dto.generated.LeadStatus.NEW);
     when(leadMapper.toEntity(any()))
         .thenReturn(new Lead("Alice", "alice@example.com", null, LeadStatus.NEW));
     when(leadService.addLead("Alice", "alice@example.com", null, LeadStatus.NEW))

@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -25,16 +24,13 @@ import ru.mentee.power.crm.domain.Lead;
 import ru.mentee.power.crm.domain.LeadStatus;
 import ru.mentee.power.crm.service.CompanyService;
 import ru.mentee.power.crm.service.LeadService;
-import ru.mentee.power.crm.web.rest.dto.CreateLeadRequest;
-import ru.mentee.power.crm.web.rest.dto.LeadResponse;
+import ru.mentee.power.crm.spring.dto.generated.LeadResponse;
 import ru.mentee.power.crm.web.rest.mapper.LeadMapper;
 
 @WebMvcTest(LeadRestController.class)
 class LeadRestControllerValidationTest {
 
   @Autowired private MockMvc mockMvc;
-
-  @Autowired private ObjectMapper objectMapper;
 
   @MockitoBean private LeadService leadService;
   @MockitoBean private CompanyService companyService;
@@ -45,16 +41,18 @@ class LeadRestControllerValidationTest {
       value = {"Alice| ", "Alice|alice-at-example.com", "A|alice@example.com"},
       delimiter = '|')
   void shouldReturn400_whenRequestIsInvalid(String name, String email) throws Exception {
-    CreateLeadRequest request = new CreateLeadRequest();
-    request.setName(name);
-    request.setEmail(email);
-    request.setStatus(LeadStatus.NEW);
+    String requestBody =
+        """
+        {
+          "name": "%s",
+          "email": "%s",
+          "status": "NEW"
+        }
+        """
+            .formatted(name, email);
 
     mockMvc
-        .perform(
-            post("/api/leads")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+        .perform(post("/api/leads").contentType(MediaType.APPLICATION_JSON).content(requestBody))
         .andExpect(status().isBadRequest());
 
     verifyNoInteractions(leadMapper, leadService, companyService);
@@ -64,12 +62,16 @@ class LeadRestControllerValidationTest {
   void shouldReturn201_whenAllFieldsAreValid() throws Exception {
     UUID leadId = UUID.randomUUID();
     UUID companyId = UUID.randomUUID();
-
-    CreateLeadRequest request = new CreateLeadRequest();
-    request.setName("Alice");
-    request.setEmail("alice@example.com");
-    request.setCompanyId(companyId);
-    request.setStatus(LeadStatus.NEW);
+    String requestBody =
+        """
+        {
+          "name": "Alice",
+          "email": "alice@example.com",
+          "companyId": "%s",
+          "status": "NEW"
+        }
+        """
+            .formatted(companyId);
 
     Company company = new Company();
     company.setId(companyId);
@@ -82,20 +84,17 @@ class LeadRestControllerValidationTest {
     response.setId(leadId);
     response.setName("Alice");
     response.setEmail("alice@example.com");
-    response.setCompanyId(companyId);
-    response.setStatus(LeadStatus.NEW);
+    response.companyId(companyId);
+    response.setStatus(ru.mentee.power.crm.spring.dto.generated.LeadStatus.NEW);
 
-    when(leadMapper.toEntity(any(CreateLeadRequest.class))).thenReturn(mappedLead);
+    when(leadMapper.toEntity(any())).thenReturn(mappedLead);
     when(companyService.findById(companyId)).thenReturn(Optional.of(company));
     when(leadService.addLead(eq("Alice"), eq("alice@example.com"), eq(company), eq(LeadStatus.NEW)))
         .thenReturn(Optional.of(createdLead));
     when(leadMapper.toResponse(createdLead)).thenReturn(response);
 
     mockMvc
-        .perform(
-            post("/api/leads")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+        .perform(post("/api/leads").contentType(MediaType.APPLICATION_JSON).content(requestBody))
         .andExpect(status().isCreated())
         .andExpect(header().string("Location", "/api/leads/" + leadId))
         .andExpect(jsonPath("$.id").value(leadId.toString()))

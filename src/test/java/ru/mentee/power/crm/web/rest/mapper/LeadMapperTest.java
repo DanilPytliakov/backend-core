@@ -3,16 +3,18 @@ package ru.mentee.power.crm.web.rest.mapper;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.mentee.power.crm.domain.Company;
 import ru.mentee.power.crm.domain.Lead;
 import ru.mentee.power.crm.domain.LeadStatus;
-import ru.mentee.power.crm.web.rest.dto.CreateLeadRequest;
-import ru.mentee.power.crm.web.rest.dto.LeadResponse;
-import ru.mentee.power.crm.web.rest.dto.UpdateLeadRequest;
+import ru.mentee.power.crm.spring.dto.generated.CreateLeadRequest;
+import ru.mentee.power.crm.spring.dto.generated.LeadResponse;
+import ru.mentee.power.crm.spring.dto.generated.UpdateLeadRequest;
 
 @SpringBootTest
 class LeadMapperTest {
@@ -27,8 +29,8 @@ class LeadMapperTest {
     CreateLeadRequest request = new CreateLeadRequest();
     request.setName("Иван Иванов");
     request.setEmail("ivan@example.com");
-    request.setCompanyId(UUID.randomUUID());
-    request.setStatus(LeadStatus.NEW);
+    request.setCompanyId(JsonNullable.of(UUID.randomUUID()));
+    request.setStatus(ru.mentee.power.crm.spring.dto.generated.LeadStatus.NEW);
 
     // When
     Lead lead = leadMapper.toEntity(request);
@@ -49,7 +51,8 @@ class LeadMapperTest {
     CreateLeadRequest request = new CreateLeadRequest();
     request.setName("Пётр");
     request.setEmail("petr@example.com");
-    // companyId и status не заданы
+    request.setCompanyId(JsonNullable.undefined());
+    // status не задан
 
     // When
     Lead lead = leadMapper.toEntity(request);
@@ -60,6 +63,7 @@ class LeadMapperTest {
     assertThat(lead.getEmail()).isEqualTo("petr@example.com");
     assertThat(lead.getCompany()).isNull();
     assertThat(lead.getId()).isNull();
+    assertThat(lead.getStatus()).isNull();
   }
 
   // ───── toResponse (Lead → LeadResponse) ─────
@@ -88,9 +92,10 @@ class LeadMapperTest {
     assertThat(response.getId()).isEqualTo(leadId);
     assertThat(response.getName()).isEqualTo("Мария Петрова");
     assertThat(response.getEmail()).isEqualTo("maria@example.com");
-    assertThat(response.getCompanyId()).isEqualTo(companyId);
-    assertThat(response.getStatus()).isEqualTo(LeadStatus.CONTACTED);
-    assertThat(response.getCreatedAt()).isEqualTo(createdAt);
+    assertThat(response.getCompanyId().get()).isEqualTo(companyId);
+    assertThat(response.getStatus())
+        .isEqualTo(ru.mentee.power.crm.spring.dto.generated.LeadStatus.CONTACTED);
+    assertThat(response.getCreatedAt()).isEqualTo(createdAt.atOffset(ZoneOffset.UTC));
   }
 
   @Test
@@ -108,7 +113,7 @@ class LeadMapperTest {
     // Then
     assertThat(response).isNotNull();
     assertThat(response.getId()).isEqualTo(leadId);
-    assertThat(response.getCompanyId()).isNull(); // company null → companyId null
+    assertThat(response.getCompanyId().isPresent()).isFalse(); // company null → companyId undefined
     assertThat(response.getName()).isEqualTo("Алексей");
   }
 
@@ -124,7 +129,7 @@ class LeadMapperTest {
     UpdateLeadRequest request = new UpdateLeadRequest();
     request.setName("Новое имя");
     request.setEmail("new@example.com");
-    request.setStatus(LeadStatus.QUALIFIED);
+    request.setStatus(ru.mentee.power.crm.spring.dto.generated.LeadStatus.QUALIFIED);
 
     // When
     leadMapper.updateEntity(request, existingLead);
@@ -150,7 +155,7 @@ class LeadMapperTest {
     UpdateLeadRequest request = new UpdateLeadRequest();
     request.setName("Другое имя");
     request.setEmail("other@example.com");
-    request.setStatus(LeadStatus.CONTACTED);
+    request.setStatus(ru.mentee.power.crm.spring.dto.generated.LeadStatus.CONTACTED);
 
     // When
     leadMapper.updateEntity(request, existingLead);
