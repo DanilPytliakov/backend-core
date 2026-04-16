@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.mentee.power.crm.domain.Company;
 import ru.mentee.power.crm.domain.Lead;
 import ru.mentee.power.crm.domain.LeadStatus;
+import ru.mentee.power.crm.exception.EntityNotFoundException;
 import ru.mentee.power.crm.repository.CompanyRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
 
@@ -39,11 +40,11 @@ class LeadServiceIntegrationTest {
   void convertLeadToDeal_shouldRollbackOnConstraintViolation() {
     Exception exception =
         assertThrows(
-            IllegalStateException.class,
+            EntityNotFoundException.class,
             () -> {
               leadService.convertLeadToDeal(UUID.randomUUID(), BigDecimal.valueOf(10000));
             });
-    assertThat(exception.getMessage()).contains("Лид не найден");
+    assertThat(exception.getMessage()).contains("Lead not found with id:");
   }
 
   @Test

@@ -43,11 +43,7 @@ public class LeadRestController {
   @GetMapping("/{id}")
   public ResponseEntity<LeadResponse> getLeadById(
       @PathVariable @NotNull(message = "ID лида обязателен") UUID id) {
-    return leadService
-        .findById(id)
-        .map(leadMapper::toResponse)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
+    return ResponseEntity.ok(leadMapper.toResponse(leadService.getLeadOrThrow(id)));
   }
 
   // Создает нового лида.
@@ -74,30 +70,20 @@ public class LeadRestController {
   @PutMapping("/{id}")
   public ResponseEntity<LeadResponse> updateLead(
       @PathVariable UUID id, @RequestBody UpdateLeadRequest request) {
-    return leadService
-        .findById(id)
-        .map(
-            existingLead -> {
-              leadMapper.updateEntity(request, existingLead);
-              Company company =
-                  request.getCompanyId() != null
-                      ? companyService.findById(request.getCompanyId()).orElse(null)
-                      : null;
-              existingLead.setCompany(company);
-              return existingLead;
-            })
-        .flatMap(leadService::updateLead)
-        .map(leadMapper::toResponse)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
+    Lead existingLead = leadService.getLeadOrThrow(id);
+    leadMapper.updateEntity(request, existingLead);
+    Company company =
+        request.getCompanyId() != null
+            ? companyService.findById(request.getCompanyId()).orElse(null)
+            : null;
+    existingLead.setCompany(company);
+    Lead updatedLead = leadService.updateLeadOrThrow(existingLead);
+    return ResponseEntity.ok(leadMapper.toResponse(updatedLead));
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteLead(@PathVariable UUID id) {
-    if (leadService.deleteLead(id)) {
-      return ResponseEntity.noContent().build();
-    } else {
-      return ResponseEntity.notFound().build();
-    }
+    leadService.deleteLeadOrThrow(id);
+    return ResponseEntity.noContent().build();
   }
 }
