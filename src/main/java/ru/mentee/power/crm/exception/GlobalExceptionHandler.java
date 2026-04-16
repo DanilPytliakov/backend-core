@@ -22,7 +22,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-  private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+  private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   @Override
   protected ResponseEntity<Object> handleMethodArgumentNotValid(
@@ -59,13 +59,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             ex.getMessage(),
             extractPath(request));
 
-    log.warn("Entity not found: {}", ex.getMessage());
+    LOG.warn("Entity not found: {}", ex.getMessage());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
   }
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, WebRequest request) {
-    log.error("Unexpected server error", ex);
+    LOG.error("Unexpected server error", ex);
 
     ErrorResponse errorResponse =
         new ErrorResponse(
