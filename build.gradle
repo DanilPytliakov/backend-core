@@ -206,6 +206,10 @@ spotless {
     }
 }
 
+tasks.named('checkstyleMain') {
+    source = source.filter { !it.path.contains('build') }
+}
+
 task bootRun8081(type: org.springframework.boot.gradle.tasks.run.BootRun) {
     group = 'application'
     description = 'Run Spring Boot on port 8081'
