@@ -174,17 +174,6 @@ jacocoTestReport {
     }
 }
 
-jacocoTestCoverageVerification {
-    dependsOn jacocoTestReport
-    violationRules {
-        rule {
-            limit {
-                minimum = 0.65
-            }
-        }
-    }
-}
-
 check {
     dependsOn jacocoTestCoverageVerification
 }
@@ -224,4 +213,41 @@ task bootRun8081(type: org.springframework.boot.gradle.tasks.run.BootRun) {
     ]
 
     args = ['--server.port=8081']
+}
+
+def jacocoExclusions = [
+        // OpenAPI generated
+        "ru/mentee/power/crm/spring/dto/generated/**",
+        "ru/mentee/power/crm/spring/rest/generated/**",
+        // JTE precompiled templates
+        "gg/jte/generated/**"
+]
+
+
+jacocoTestReport {
+    dependsOn test
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: jacocoExclusions)
+        }))
+    }
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+jacocoTestCoverageVerification {
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: jacocoExclusions)
+        }))
+    }
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.65
+            }
+        }
+    }
 }
