@@ -7,6 +7,7 @@ plugins {
     id 'org.springframework.boot' version '3.5.0'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'com.diffplug.spotless' version '7.2.1'
+    id 'org.openapi.generator' version '7.1.0'
 }
 
 group = 'ru.mentee.power'
@@ -26,6 +27,9 @@ ext {
     springCloudVersion = '2025.0.0'
     // Resilience4j Spring Boot 3 integration (annotations @Retry, etc.)
     resilience4jVersion = '2.4.0'
+    // OpenAPI и документация (Sprint 8)
+    openApiGeneratorVersion = '7.1.0'
+    springdocVersion = '2.3.0'
 }
 
 java {
@@ -105,7 +109,38 @@ dependencies {
 
     // WireMock для интеграционных тестов внешних API
     testImplementation 'org.wiremock:wiremock-standalone:3.4.2'
+
+    //OpenAPI документация
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
 }
+
+openApiGenerate {
+    generatorName = "spring"
+    inputSpec = "${rootProject.projectDir}/src/main/resources/api/api-spec.yaml"
+    outputDir = "${buildDir}/generated"
+    apiPackage = "ru.mentee.power.crm.spring.rest.generated"
+    modelPackage = "ru.mentee.power.crm.spring.dto.generated"
+    configOptions = [
+            interfaceOnly: "true",
+            useTags: "true",
+            dateLibrary: "java8",
+            useSpringBoot3: "true",
+            documentationProvider: "none"
+    ]
+}
+
+// Добавить сгенерированные файлы в sourceSets
+sourceSets {
+    main {
+        java {
+            srcDir "${buildDir}/generated/src/main/java"
+        }
+    }
+}
+
+// Привязать генерацию к компиляции
+compileJava.dependsOn tasks.openApiGenerate
 
 tasks.named('compileJava', JavaCompile) {
     options.compilerArgs += [
@@ -139,17 +174,6 @@ jacocoTestReport {
     }
 }
 
-jacocoTestCoverageVerification {
-    dependsOn jacocoTestReport
-    violationRules {
-        rule {
-            limit {
-                minimum = 0.65
-            }
-        }
-    }
-}
-
 check {
     dependsOn jacocoTestCoverageVerification
 }
@@ -171,6 +195,10 @@ spotless {
     }
 }
 
+tasks.named('checkstyleMain') {
+    source = source.filter { !it.path.contains('build') }
+}
+
 task bootRun8081(type: org.springframework.boot.gradle.tasks.run.BootRun) {
     group = 'application'
     description = 'Run Spring Boot on port 8081'
@@ -185,4 +213,41 @@ task bootRun8081(type: org.springframework.boot.gradle.tasks.run.BootRun) {
     ]
 
     args = ['--server.port=8081']
+}
+
+def jacocoExclusions = [
+        // OpenAPI generated
+        "ru/mentee/power/crm/spring/dto/generated/**",
+        "ru/mentee/power/crm/spring/rest/generated/**",
+        // JTE precompiled templates
+        "gg/jte/generated/**"
+]
+
+
+jacocoTestReport {
+    dependsOn test
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: jacocoExclusions)
+        }))
+    }
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+jacocoTestCoverageVerification {
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: jacocoExclusions)
+        }))
+    }
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.65
+            }
+        }
+    }
 }

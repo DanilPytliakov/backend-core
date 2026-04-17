@@ -1,0 +1,296 @@
+openapi: 3.0.3
+info:
+  title: CRM Lead Management API
+  version: 1.0.0
+  description: REST API для управления лидами в CRM системе
+  contact:
+    name: Backend Team
+    email: backend@mentee.power
+servers:
+  - url: http://localhost:8081
+    description: Local development server
+
+paths:
+  /api/leads:
+    get:
+      operationId: getAllLeads
+      summary: Получить список всех лидов
+      tags:
+        - Lead Management
+      responses:
+        '200':
+          description: Успешное получение списка лидов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LeadResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      operationId: createLead
+      summary: Создать нового лида
+      tags:
+        - Lead Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLeadRequest'
+      responses:
+        '201':
+          description: Лид успешно создан
+          headers:
+            Location:
+              description: URI созданного лида
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadResponse'
+        '400':
+          description: Ошибка валидации входных данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Лид с таким email уже существует
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/leads/{id}:
+    get:
+      operationId: getLeadById
+      summary: Получить лида по ID
+      tags:
+        - Lead Management
+      parameters:
+        - $ref: '#/components/parameters/LeadId'
+      responses:
+        '200':
+          description: Лид найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadResponse'
+        '404':
+          description: Лид не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      operationId: updateLead
+      summary: Обновить существующего лида
+      tags:
+        - Lead Management
+      parameters:
+        - $ref: '#/components/parameters/LeadId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLeadRequest'
+      responses:
+        '200':
+          description: Лид успешно обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadResponse'
+        '404':
+          description: Лид не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      operationId: deleteLead
+      summary: Удалить лида
+      tags:
+        - Lead Management
+      parameters:
+        - $ref: '#/components/parameters/LeadId'
+      responses:
+        '204':
+          description: Лид успешно удалён
+        '404':
+          description: Лид не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  parameters:
+    LeadId:
+      name: id
+      in: path
+      required: true
+      description: Уникальный идентификатор лида
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    CreateLeadRequest:
+      type: object
+      required:
+        - email
+        - name
+        - status
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 50
+          description: Имя лида
+          example: Иван Петров
+        email:
+          type: string
+          format: email
+          description: Email лида
+          example: ivan.petrov@example.com
+        companyId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Идентификатор компании
+          example: 550e8400-e29b-41d4-a716-446655440000
+        status:
+          $ref: '#/components/schemas/LeadStatus'
+
+    UpdateLeadRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Обновлённое имя лида
+          example: Иван Петров
+        email:
+          type: string
+          format: email
+          description: Обновлённый email лида
+          example: ivan.petrov@example.com
+        companyId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Новый идентификатор компании
+          example: 550e8400-e29b-41d4-a716-446655440000
+        status:
+          $ref: '#/components/schemas/LeadStatus'
+
+    LeadResponse:
+      type: object
+      required:
+        - id
+        - email
+        - name
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор лида
+          example: 550e8400-e29b-41d4-a716-446655440000
+        name:
+          type: string
+          description: Имя лида
+          example: Иван Петров
+        email:
+          type: string
+          format: email
+          description: Email лида
+          example: ivan.petrov@example.com
+        companyId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Идентификатор компании
+          example: 550e8400-e29b-41d4-a716-446655440000
+        status:
+          $ref: '#/components/schemas/LeadStatus'
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата и время создания лида
+          example: 2026-04-16T12:30:00
+
+    LeadStatus:
+      type: string
+      description: Статус лида
+      enum:
+        - NEW
+        - CONTACTED
+        - QUALIFIED
+        - LOST
+
+    ErrorResponse:
+      type: object
+      required:
+        - timestamp
+        - status
+        - error
+        - message
+        - path
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Момент возникновения ошибки
+        status:
+          type: integer
+          format: int32
+          description: HTTP статус код
+          example: 404
+        error:
+          type: string
+          description: Короткое название HTTP статуса
+          example: Not Found
+        message:
+          type: string
+          description: Человекочитаемое описание ошибки
+          example: "Lead not found with id: abc-123"
+        path:
+          type: string
+          description: URI, к которому обращался клиент
+          example: /api/leads/abc-123
+        errors:
+          type: object
+          nullable: true
+          additionalProperties:
+            type: string
+          description: Ошибки валидации по полям
