@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.mentee.power.crm.domain.Company;
+import ru.mentee.power.crm.domain.Lead;
 
 @Repository
 public interface CompanyRepository extends JpaRepository<Company, UUID> {
@@ -27,4 +28,8 @@ public interface CompanyRepository extends JpaRepository<Company, UUID> {
   @Query(
       "SELECT DISTINCT c.industry FROM Company c WHERE c.industry IS NOT NULL ORDER BY c.industry")
   List<String> findAllIndustries();
+
+  // Поиск всех компаний, принадлежащих к указанной группе
+  @Query("SELECT c FROM Company c WHERE c.companyGroup.id = :groupId ORDER BY c.name ASC")
+  List<Company> findAllByCompanyGroupId(@Param("groupId") UUID groupId);
 }

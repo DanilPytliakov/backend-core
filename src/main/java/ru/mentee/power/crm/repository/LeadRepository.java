@@ -93,4 +93,26 @@ public interface LeadRepository extends JpaRepository<Lead, UUID>, JpaSpecificat
   @Modifying
   @Query("UPDATE Lead l SET l.status = :status WHERE l.id = :id")
   void updateStatus(@Param("id") UUID id, @Param("status") LeadStatus status);
+
+  // Обновление статуса лидов по почте группы
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Query(
+      value =
+          """
+          UPDATE leads
+          SET status = :#{#newStatus.name()}
+          WHERE company_id IN (
+              SELECT c.id
+              FROM companies c
+              JOIN company_group cg ON cg.id = c.company_group_id
+              WHERE cg.email = :email
+          )
+          """,
+      nativeQuery = true)
+  int updateStatusByCompanyGroupEmail(
+          @Param("email") String email,
+          @Param("newStatus") LeadStatus newStatus);
+
+  @Query("SELECT l FROM Lead l WHERE l.company.companyGroup.id = :groupId")
+  List<Lead> findAllByCompanyGroupId(@Param("groupId") UUID groupId);
 }

@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,7 @@ import ru.mentee.power.crm.domain.Deal;
 import ru.mentee.power.crm.domain.Lead;
 import ru.mentee.power.crm.domain.LeadStatus;
 import ru.mentee.power.crm.dto.CreateLeadForm;
+import ru.mentee.power.crm.repository.CompanyGroupRepository;
 import ru.mentee.power.crm.repository.CompanyRepository;
 import ru.mentee.power.crm.repository.DealRepository;
 import ru.mentee.power.crm.repository.LeadRepository;
@@ -36,6 +39,7 @@ public class LeadService {
   private final DealRepository dealRepository;
   private final LeadProcessor leadProcessor;
   private final CompanyRepository companyRepository;
+  private final CompanyGroupRepository companyGroupRepository;
   private static final Logger LOG = LoggerFactory.getLogger(LeadService.class);
 
   public Optional<Lead> addLead(String name, String email, Company company, LeadStatus status) {
@@ -170,5 +174,13 @@ public class LeadService {
 
   public List<Lead> findByCompanyId(UUID companyId) {
     return leadRepository.findByCompanyId(companyId);
+  }
+
+  // С проверкой существования группы
+  public int updateLeadsStatusByGroupEmailWithCheck(String email, LeadStatus newStatus) {
+    if (!companyGroupRepository.existsByEmail(email)) {
+      throw new EntityNotFoundException("CompanyGroup not found with email: " + email);
+    }
+    return leadRepository.updateStatusByCompanyGroupEmail(email, newStatus);
   }
 }

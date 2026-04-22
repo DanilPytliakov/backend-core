@@ -25,6 +25,10 @@ public class Company {
 
   private String industry;
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "company_group_id")
+  private CompanyGroup companyGroup;
+
   @OneToMany(mappedBy = "company", cascade = CascadeType.PERSIST)
   private List<Lead> leads = new ArrayList<>();
 
